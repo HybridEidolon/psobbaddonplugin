@@ -11,8 +11,8 @@
 static int wrap_exceptions(lua_State *L, lua_CFunction f);
 static int psolua_print(lua_State *L);
 static void _load_addons(lua_State* L);
-static const char* psolualib_read_cstr(int memory_address, int len = 2048);
-static const char* psolualib_read_wstr(int memory_address, int len = 1024);
+static std::string psolualib_read_cstr(int memory_address, int len = 2048);
+static std::string psolualib_read_wstr(int memory_address, int len = 1024);
 static sol::table psolualib_read_mem(sol::table t, int memory_address, int len);
 
 bool psolua_initialize_on_next_frame = false;
@@ -190,7 +190,7 @@ void psolua_initialize_state(void) {
 	psolua_initialize_on_next_frame = false;
 }
 
-static const char* psolualib_read_cstr(int memory_address, int len) {
+static std::string psolualib_read_cstr(int memory_address, int len) {
 	char buf[8192];
 	memset(buf, 0, len);
 	SIZE_T read;
@@ -201,18 +201,20 @@ static const char* psolualib_read_cstr(int memory_address, int len) {
 	return buf;
 }
 
-static const char* psolualib_read_wstr(int memory_address, int len) {
+static std::string psolualib_read_wstr(int memory_address, int len) {
 	char buf[8192];
 	char buf2[8192];
 	memset(buf, 0, len * 2);
 	memset(buf2, 0, len * 2);
 	SIZE_T read;
 	auto pid = GetCurrentProcess();
-	ReadProcessMemory(pid, (LPCVOID)memory_address, buf, len * 2, &read);
+	if (!ReadProcessMemory(pid, (LPCVOID)memory_address, buf, len * 2, &read)) {
+		throw "ReadProcessMemory error";
+	}
 	if (!WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, (LPCWCH)buf, len, buf2, 8192, nullptr, nullptr)) {
 		throw "invalid utf-16 string";
 	}
-	return buf;
+	return buf2;
 }
 
 static sol::table psolualib_read_mem(sol::table t, int memory_address, int len) {

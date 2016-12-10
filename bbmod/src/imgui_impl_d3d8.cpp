@@ -441,9 +441,6 @@ bool ImGui_ImplD3D8_Init(void* hwnd, IDirect3DDevice8** device) {
 		return false;
 
 	*device = (IDirect3DDevice8*)new ImguiD3D8Device(*device);
-	D3DDEVICE_CREATION_PARAMETERS params;
-	(*device)->GetCreationParameters(&params);
-	g_log << "Behavior flags: " << params.BehaviorFlags << std::endl;
 	g_device = *device;
 
 	ImGuiIO& io = ImGui::GetIO();
