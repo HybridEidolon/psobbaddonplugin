@@ -178,7 +178,7 @@ void ImGui_ImplD3D8_RenderDrawLists(ImDrawData* draw_data)
 			return;
 	}
 	if (!g_maskVB && !g_maskIB) {
-		if (g_device->CreateVertexBuffer(6 * sizeof(CUSTOMVERTEX), D3DUSAGE_WRITEONLY, D3DFVF_CUSTOMVERTEX, D3DPOOL_DEFAULT, &g_maskVB) < 0) return;
+		if (g_device->CreateVertexBuffer(6 * sizeof(CUSTOMVERTEX), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, D3DFVF_CUSTOMVERTEX, D3DPOOL_DEFAULT, &g_maskVB) < 0) return;
 		if (g_device->CreateIndexBuffer(6, D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, sizeof(ImDrawIdx) == 2 ? D3DFMT_INDEX16 : D3DFMT_INDEX32, D3DPOOL_DEFAULT, &g_maskIB) < 0) return;
 		ImDrawIdx* idx_dst;
 		g_maskIB->Lock(0, 6 * sizeof(ImDrawIdx), (BYTE**)&idx_dst, D3DLOCK_DISCARD);
