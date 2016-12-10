@@ -111,6 +111,18 @@ static void _load_addons(lua_State* L) {
 	FindClose(hFind);
 }
 
+template <typename T> std::function<T(int)> read_t(void) {
+	auto pid = GetCurrentProcess();
+	return [=](int addr) {
+		char buf[sizeof(T)];
+		SIZE_T read;
+		if (!ReadProcessMemory(pid, (LPCVOID)addr, (LPVOID)buf, sizeof(T), &read)) {
+			throw "ReadProcessMemory error";
+		}
+		return *(T*)buf;
+	};
+}
+
 void psolua_load_library(lua_State * L) {
 	sol::state_view lua(L);
 
@@ -124,16 +136,16 @@ void psolua_load_library(lua_State * L) {
 	psoTable["error_handler"] = psolualib_error_handler;
 	psoTable["reload"] = []() { psolua_initialize_on_next_frame = true; };
 
-	psoTable["read_i8"] = [](int a) { return *(int8_t*)a; };
-	psoTable["read_i16"] = [](int a) { return *(int16_t*)a; };
-	psoTable["read_i32"] = [](int a) { return *(int32_t*)a; };
-	psoTable["read_i64"] = [](int a) { return *(int64_t*)a; };
-	psoTable["read_u8"] = [](int a) { return *(uint8_t*)a; };
-	psoTable["read_u16"] = [](int a) { return *(uint16_t*)a; };
-	psoTable["read_u32"] = [](int a) { return *(uint32_t*)a; };
-	psoTable["read_u64"] = [](int a) { return *(uint64_t*)a; };
-	psoTable["read_f32"] = [](int a) { return *(float*)a; };
-	psoTable["read_f64"] = [](int a) { return *(double*)a; };
+	psoTable["read_i8"] = read_t<int8_t>();
+	psoTable["read_i16"] = read_t<int16_t>();
+	psoTable["read_i32"] = read_t<int32_t>();
+	psoTable["read_i64"] = read_t<int64_t>();
+	psoTable["read_u8"] = read_t<uint8_t>();
+	psoTable["read_u16"] = read_t<uint16_t>();
+	psoTable["read_u32"] = read_t<uint32_t>();
+	psoTable["read_u64"] = read_t<uint64_t>();
+	psoTable["read_f32"] = read_t<float>();
+	psoTable["read_f64"] = read_t<double>();
 	psoTable["read_cstr"] = psolualib_read_cstr;
 	psoTable["read_wstr"] = psolualib_read_wstr;
 	psoTable["read_mem"] = psolualib_read_mem;
@@ -179,15 +191,25 @@ void psolua_initialize_state(void) {
 }
 
 static const char* psolualib_read_cstr(int memory_address, int len) {
-	static char buf[2048];
-	memcpy(buf, (char*)memory_address, len);
+	char buf[8192];
+	memset(buf, 0, len);
+	SIZE_T read;
+	auto pid = GetCurrentProcess();
+	if (!ReadProcessMemory(pid, (LPCVOID)memory_address, buf, len, &read)) {
+		throw "ReadProcessMemory error";
+	}
 	return buf;
 }
 
 static const char* psolualib_read_wstr(int memory_address, int len) {
-	static char buf[2048];
-	wchar_t* memory = (wchar_t*)memory_address;
-	if (!WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, memory, len, buf, 2048, nullptr, nullptr)) {
+	char buf[8192];
+	char buf2[8192];
+	memset(buf, 0, len * 2);
+	memset(buf2, 0, len * 2);
+	SIZE_T read;
+	auto pid = GetCurrentProcess();
+	ReadProcessMemory(pid, (LPCVOID)memory_address, buf, len * 2, &read);
+	if (!WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, (LPCWCH)buf, len, buf2, 8192, nullptr, nullptr)) {
 		throw "invalid utf-16 string";
 	}
 	return buf;
@@ -195,12 +217,18 @@ static const char* psolualib_read_wstr(int memory_address, int len) {
 
 static sol::table psolualib_read_mem(sol::table t, int memory_address, int len) {
 	sol::state_view lua(g_LuaState);
+	char buf[8192];
+	memset(buf, 0, len);
+	SIZE_T read;
+	auto pid = GetCurrentProcess();
 	if (len < 0) {
 		throw "length must be greater than 0";
 	}
-	BYTE* mem = (BYTE*)memory_address;
+	if (!ReadProcessMemory(pid, (LPCVOID)memory_address, buf, len, &read)) {
+		throw "ReadProcessMemory error";
+	}
 	for (int i = 0; i < len; i++) {
-		t.add((int)mem[i]);
+		t.add((int)buf[i]);
 	}
 	return t;
 }
