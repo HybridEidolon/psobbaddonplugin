@@ -219,7 +219,7 @@ static std::string psolualib_read_wstr(int memory_address, int len) {
 
 static sol::table psolualib_read_mem(sol::table t, int memory_address, int len) {
 	sol::state_view lua(g_LuaState);
-	char buf[8192];
+	unsigned char buf[8192];
 	memset(buf, 0, len);
 	SIZE_T read;
 	auto pid = GetCurrentProcess();
