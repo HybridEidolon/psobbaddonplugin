@@ -95,9 +95,6 @@
       <ModuleDefinitionFile>dinput8.def</ModuleDefinitionFile>
       <AdditionalDependencies>advapi32.lib;$(SolutionDir)libs\libMinHook-x86-v140-mtd.lib;$(SolutionDir)libs\lua51.lib</AdditionalDependencies>
     </Link>
-    <PostBuildEvent>
-      <Command>copy /B /Y $(OutputPath)$(TargetFileName) D:\ZBackup\Tools\PSOBBUnmodified</Command>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -126,9 +123,6 @@
       <ModuleDefinitionFile>dinput8.def</ModuleDefinitionFile>
       <AdditionalDependencies>advapi32.lib;$(SolutionDir)libs\libMinHook-x86-v140-mtd.lib;$(SolutionDir)libs\lua51.lib</AdditionalDependencies>
     </Link>
-    <PostBuildEvent>
-      <Command>copy /B /Y $(OutputPath)$(TargetFileName) D:\ZBackup\Tools\PSOBBUnmodified</Command>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
