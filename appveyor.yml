@@ -1,3 +1,5 @@
+version: 0.3.0.${build}
+
 branches:
   except:
     - gh-pages
@@ -14,3 +16,8 @@ configuration:
   - Debug
   - Release
 
+after_build:
+  - 7z a bbmod-$(configuration)-%APPVEYOR_REPO_COMMIT%.zip %APPVEYOR_BUILD_FOLDER%\$(configuration)\dinput8.* %APPVEYOR_BUILD_FOLDER%\README.md addons
+
+artifacts:
+  - path: bbmod-$(configuration)-%APPVEYOR_REPO_COMMIT%.zip
