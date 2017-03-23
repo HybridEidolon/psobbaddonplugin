@@ -17,7 +17,15 @@ configuration:
   - Release
 
 after_build:
-  - 7z a bbmod.zip %APPVEYOR_BUILD_FOLDER%\%CONFIGURATION%\dinput8.dll %APPVEYOR_BUILD_FOLDER%\%CONFIGURATION%\dinput8.pdb %APPVEYOR_BUILD_FOLDER%\README.md addons
+  - ps: ci/after_build.ps1
 
-artifacts:
-  - path: bbmod.zip
+deploy:
+  artifact: /.*\.zip/
+  auth_token:
+    secure: udfK+NwCNkCuD5KHX3lxRF9XHQLxEqtRPdpq2vihJr5W6iRuxbBbrgW5dpd5tO2O
+  description: ''
+  draft: true
+  on:
+    CONFIGURATION: Release
+    appveyor_repo_tag: true
+  provider: GitHub
