@@ -1,0 +1,16 @@
+branches:
+  except:
+    - gh-pages
+
+image: Visual Studio 2015
+
+init:
+  - git config --global core.autocrlf input
+
+platform:
+  - x86
+
+configuration:
+  - Debug
+  - Release
+
