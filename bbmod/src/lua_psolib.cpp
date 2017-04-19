@@ -10,7 +10,6 @@
 
 static int wrap_exceptions(lua_State *L, lua_CFunction f);
 static int psolua_print(lua_State *L);
-static void _load_addons(lua_State* L);
 static std::string psolualib_read_cstr(int memory_address, int len = 2048);
 static std::string psolualib_read_wstr(int memory_address, int len = 1024);
 static sol::table psolualib_read_mem(sol::table t, int memory_address, int len);
@@ -62,55 +61,6 @@ static int psolua_print(lua_State *L) {
     return 0;
 }
 
-static std::vector<std::string> _get_addon_directory_names(void) {
-    HANDLE hFind;
-    WIN32_FIND_DATA find;
-
-    std::vector<std::string> ret;
-
-    hFind = FindFirstFileA("addons/*", &find);
-    do {
-        std::string filename(find.cFileName);
-        if (filename == "..") continue;
-        if (filename == ".") continue;
-        ret.push_back(filename);
-    } while (FindNextFileA(hFind, &find));
-
-    FindClose(hFind);
-
-    return ret;
-}
-
-// Load addons by require-ing the directory names.
-static void _load_addons(lua_State* L) {
-    sol::state_view lua(L);
-
-    HANDLE hFind;
-    WIN32_FIND_DATA find;
-
-    psolua_addons().clear();
-
-    hFind = FindFirstFileA("addons/*", &find);
-    do {
-        std::string filename(find.cFileName);
-        if (filename == "..") continue;
-        if (filename == ".") continue;
-        if (find.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
-            sol::protected_function require = lua["require"];
-            require.error_handler = lua["pso"]["error_handler"];
-            if (!require(std::string(filename)).valid()) {
-                g_log << "Error loading addon " << filename << "." << std::endl;
-                psolua_add_failed_addon(filename);
-            }
-            else {
-                g_log << "Addon module " << filename << " loaded." << std::endl;
-            }
-        }
-    } while (FindNextFileA(hFind, &find));
-
-    FindClose(hFind);
-}
-
 template <typename T> std::function<T(int)> read_t(void) {
     auto pid = GetCurrentProcess();
     return [=](int addr) {
@@ -128,10 +78,6 @@ void psolua_load_library(lua_State * L) {
 
     lua["print"] = psolua_print;
     sol::table psoTable = lua.create_named_table("pso");
-    psoTable["on_present"] = psolualib_on_present;
-    psoTable["on_init"] = psolualib_on_init;
-    psoTable["on_key_pressed"] = psolualib_on_key_pressed;
-    psoTable["on_key_released"] = psolualib_on_key_released;
 
     psoTable["error_handler"] = psolualib_error_handler;
     psoTable["reload"] = []() { psolua_initialize_on_next_frame = true; };
@@ -150,8 +96,6 @@ void psolua_load_library(lua_State * L) {
     psoTable["read_wstr"] = psolualib_read_wstr;
     psoTable["read_mem"] = psolualib_read_mem;
 
-    lua["package"]["path"] = "./addons/?.lua;./addons/?/init.lua;./?.lua;./?/init.lua";
-
     // Exception handling
     lua_pushlightuserdata(L, (void*)wrap_exceptions);
     luaJIT_setmode(L, -1, LUAJIT_MODE_WRAPCFUNC | LUAJIT_MODE_ON);
@@ -159,10 +103,6 @@ void psolua_load_library(lua_State * L) {
 
     // ImGui library
     luaopen_imgui(L);
-
-    psolua_install_hooks(L);
-
-    _load_addons(L);
 }
 
 void psolua_initialize_state(void) {

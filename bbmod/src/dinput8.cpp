@@ -47,45 +47,11 @@ BYTE *codeBase, *codeEnd, *dataBase, *dataEnd;
 static IDirectInput8A* dinput8AModule = nullptr;
 static IDirect3D8* d3d8Module = nullptr;
 
-void PSOBBMain() {
-    //window_title_addr = (char*)0x00ACBE70;
-    //strcpy_s(window_title_addr, strlen("PHANTASY STAR ONLINE Blue Burst"), "overbudgeted on candles");
-    if (oPSOBB_Main != nullptr) {
-        oPSOBB_Main();
-    }
-}
-
 // hack to work around __thiscall not being usable
 void __fastcall PSOBB_InitD3D(void* self, void* notused) {
     if (oPSOBB_InitD3D != nullptr) {
-        // We have to hot-patch the device creation function so that it has FPU_PRESERVE on _EVERY POSSIBLE INVOCATION_
-        // Otherwise we're in for a world of hurt in the LuaJIT runtime.
-        /*
-        BYTE* push_behavior_flags;
-        push_behavior_flags = (BYTE*)0x00837C58;
-        push_behavior_flags[1] |= (BYTE)D3DCREATE_FPU_PRESERVE;
-        push_behavior_flags = (BYTE*)0x00837DC1;
-        push_behavior_flags[1] |= (BYTE)D3DCREATE_FPU_PRESERVE;
-        push_behavior_flags = (BYTE*)0x00837E23;
-        push_behavior_flags[1] |= (BYTE)D3DCREATE_FPU_PRESERVE;
-        push_behavior_flags = (BYTE*)0x00837FF4;
-        push_behavior_flags[1] |= (BYTE)D3DCREATE_FPU_PRESERVE;
-        push_behavior_flags = (BYTE*)0x00838167;
-        push_behavior_flags[1] |= (BYTE)D3DCREATE_FPU_PRESERVE;
-        push_behavior_flags = (BYTE*)0x008381D3;
-        push_behavior_flags[1] |= (BYTE)D3DCREATE_FPU_PRESERVE;
-        push_behavior_flags = (BYTE*)0x0083833C;
-        push_behavior_flags[1] |= (BYTE)D3DCREATE_FPU_PRESERVE;
-        push_behavior_flags = (BYTE*)0x0083839E;
-        push_behavior_flags[1] |= (BYTE)D3DCREATE_FPU_PRESERVE;
-        push_behavior_flags = (BYTE*)0x0083850A;
-        push_behavior_flags[1] |= (BYTE)D3DCREATE_FPU_PRESERVE;
-        push_behavior_flags = (BYTE*)0x0083856F;
-        push_behavior_flags[1] |= (BYTE)D3DCREATE_FPU_PRESERVE;
-        push_behavior_flags = (BYTE*)0x008386E2;
-        push_behavior_flags[1] |= (BYTE)D3DCREATE_FPU_PRESERVE;*/
-
         oPSOBB_InitD3D(self);
+        // bad d3d. evil. do not.
         __asm finit;
     }
 
@@ -107,8 +73,6 @@ void Initialize() {
     MH_Initialize();
 
     if (DO_HOOKS) {
-        //MH_CreateHook(PSOBB_MAIN, PSOBBMain, (void**)(&oPSOBB_Main));
-        //MH_EnableHook(PSOBB_MAIN);
         MH_CreateHook((void*)PSOBB_INITD3D, PSOBB_InitD3D, (void**)(&oPSOBB_InitD3D));
         MH_EnableHook((void*)PSOBB_INITD3D);
     }

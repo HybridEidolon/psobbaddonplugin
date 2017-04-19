@@ -4,7 +4,6 @@
 #include "imgui/imgui_internal.h"
 #include "imgui_impl_d3d8.h"
 #include "log.h"
-#include "ui.h"
 #include "luastate.h"
 #include "lua_hooks.h"
 #include "lua_psolib.h"
@@ -88,7 +87,6 @@ STDMETHODIMP ImguiD3D8Device::Present(CONST RECT * pSourceRect, CONST RECT * pDe
 {
     psolua_process_key_events();
     psoluah_Present();
-    ModUI_Main();
 
     if (device->BeginScene() >= 0) {
         // Prevent imgui from asserting.
