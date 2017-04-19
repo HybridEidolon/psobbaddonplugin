@@ -5,10 +5,10 @@
 #include "sol.hpp"
 
 struct AddonDescriptor {
-	std::string name = "";
-	std::string version = "";
-	std::string author = "";
-	int status = 0;
+    std::string name = "";
+    std::string version = "";
+    std::string author = "";
+    int status = 0;
 };
 
 std::vector<AddonDescriptor>& psolua_addons();

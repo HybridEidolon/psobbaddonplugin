@@ -46,16 +46,16 @@ static int impl_##name(lua_State *L) { \
   int stackval = 0;
 
 #define TEXTURE_ARG(name) \
-	lua_getglobal(L, "imgui"); \
-	lua_pushvalue(L, arg++); \
-	lua_setfield(L, -2, "textureID"); \
-	luaL_dostring(L, "imgui.textures = imgui.textures or {}\
-					  table.insert(imgui.textures, imgui.textureID)\
-					  return #imgui.textures"); \
-	lua_pop(L, 1); \
-	int index = luaL_checkint(L, 0);\
-	g_textures[index - 1] = index; \
-	void *name = &g_textures[index - 1]; \
+    lua_getglobal(L, "imgui"); \
+    lua_pushvalue(L, arg++); \
+    lua_setfield(L, -2, "textureID"); \
+    luaL_dostring(L, "imgui.textures = imgui.textures or {}\
+                      table.insert(imgui.textures, imgui.textureID)\
+                      return #imgui.textures"); \
+    lua_pop(L, 1); \
+    int index = luaL_checkint(L, 0);\
+    g_textures[index - 1] = index; \
+    void *name = &g_textures[index - 1]; \
 
 #define OPTIONAL_LABEL_ARG(name, value) \
   const char* name; \
@@ -79,7 +79,7 @@ static int impl_##name(lua_State *L) { \
 #define END_LABEL_POINTER(name) \
   if (name != NULL) { \
     lua_pushstring(L, name); \
-	delete[] name; \
+    delete[] name; \
     stackval++; \
       }
 
@@ -89,10 +89,10 @@ static int impl_##name(lua_State *L) { \
   std::vector<const char *> list; \
   for (int i = 0; i < len; i++) \
   { \
-	lua_pushinteger(L, i + 1); \
-	lua_gettable(L, arg - 1); \
-	size_t current_size; \
-	list.push_back(luaL_checklstring(L, -1, &(current_size))); \
+    lua_pushinteger(L, i + 1); \
+    lua_gettable(L, arg - 1); \
+    size_t current_size; \
+    list.push_back(luaL_checklstring(L, -1, &(current_size))); \
   } \
   const char **name = list.data(); \
 
@@ -155,9 +155,9 @@ static int impl_##name(lua_State *L) { \
   std::vector<float> list; \
   for (int i = 0; i < len; i++) \
     { \
-	lua_pushinteger(L, i + 1); \
-	lua_gettable(L, arg - 1); \
-	list.push_back(luaL_checknumber(L, -1)); \
+    lua_pushinteger(L, i + 1); \
+    lua_gettable(L, arg - 1); \
+    list.push_back(luaL_checknumber(L, -1)); \
     } \
   const float *name = list.data(); \
 
@@ -245,42 +245,42 @@ static int impl_##name(lua_State *L) { \
 #define OPTIONAL_ENUM_ARG(name, otherwise)\
   int name = otherwise; \
   if (arg <= max_args) { \
-	if (lua_istable(L, arg++)) { \
-		int len = lua_objlen(L, -1); \
-		for (int i = 0; i < len; i++) { \
-			lua_pushinteger(L, i + 1); \
-			lua_gettable(L, arg - 1); \
-			lua_pushvalue(L, -1); \
-			lua_gettable(L, lua_upvalueindex(1)); \
-			name = name | (int)lua_tonumber(L, -1); \
-			lua_pop(L, 1); \
-		} \
-	} else { \
-		lua_pushvalue(L, arg - 1); \
-		lua_gettable(L, lua_upvalueindex(1)); \
-		name = (int)lua_tonumber(L, -1); \
-		lua_pop(L, 1); \
-		} \
+    if (lua_istable(L, arg++)) { \
+        int len = lua_objlen(L, -1); \
+        for (int i = 0; i < len; i++) { \
+            lua_pushinteger(L, i + 1); \
+            lua_gettable(L, arg - 1); \
+            lua_pushvalue(L, -1); \
+            lua_gettable(L, lua_upvalueindex(1)); \
+            name = name | (int)lua_tonumber(L, -1); \
+            lua_pop(L, 1); \
+        } \
+    } else { \
+        lua_pushvalue(L, arg - 1); \
+        lua_gettable(L, lua_upvalueindex(1)); \
+        name = (int)lua_tonumber(L, -1); \
+        lua_pop(L, 1); \
+        } \
     }
 
 #define ENUM_ARG(name) \
-	int name = 0; \
-	if (lua_istable(L, arg++)) { \
-		int len = lua_objlen(L, -1); \
-		for (int i = 0; i < len; i++) { \
-			lua_pushinteger(L, i + 1); \
-			lua_gettable(L, arg - 1); \
-			lua_pushvalue(L, -1); \
-			lua_gettable(L, lua_upvalueindex(1)); \
-			name = name | (int)lua_tonumber(L, -1); \
-			lua_pop(L, 1); \
-		} \
-	} else { \
-		lua_pushvalue(L, arg - 1); \
-		lua_gettable(L, lua_upvalueindex(1)); \
-		name = (int)lua_tonumber(L, -1); \
-		lua_pop(L, 1); \
-	}
+    int name = 0; \
+    if (lua_istable(L, arg++)) { \
+        int len = lua_objlen(L, -1); \
+        for (int i = 0; i < len; i++) { \
+            lua_pushinteger(L, i + 1); \
+            lua_gettable(L, arg - 1); \
+            lua_pushvalue(L, -1); \
+            lua_gettable(L, lua_upvalueindex(1)); \
+            name = name | (int)lua_tonumber(L, -1); \
+            lua_pop(L, 1); \
+        } \
+    } else { \
+        lua_pushvalue(L, arg - 1); \
+        lua_gettable(L, lua_upvalueindex(1)); \
+        name = (int)lua_tonumber(L, -1); \
+        lua_pop(L, 1); \
+    }
 
 #define OPTIONAL_UINT_ARG(name, otherwise)\
   unsigned int name = otherwise; \
@@ -329,11 +329,11 @@ static int impl_##name(lua_State *L) { \
   bool i_##name##_value; \
   bool* name = NULL; \
   if (arg <= max_args) { \
-	if (lua_isboolean(L, arg++)) \
-		{ \
-			i_##name##_value = (bool)lua_toboolean(L, arg - 1); \
-			name = &(i_##name##_value); \
-	} \
+    if (lua_isboolean(L, arg++)) \
+        { \
+            i_##name##_value = (bool)lua_toboolean(L, arg - 1); \
+            name = &(i_##name##_value); \
+    } \
     }
 
 #define OPTIONAL_BOOL_ARG(name, otherwise) \
@@ -418,137 +418,137 @@ static void ImEndStack(int type) { \
 
 static int w_Value(lua_State *L)
 {
-	if (lua_isboolean(L, 2))
-	{
-		return impl_Value(L);
-	}
-	return impl_Value_4(L);
+    if (lua_isboolean(L, 2))
+    {
+        return impl_Value(L);
+    }
+    return impl_Value_4(L);
 }
 
 static int w_ValueColor(lua_State *L)
 {
-	if (lua_gettop(L) > 2)
-	{
-		return impl_ValueColor(L);
-	}
-	return impl_ValueColor_2(L);
+    if (lua_gettop(L) > 2)
+    {
+        return impl_ValueColor(L);
+    }
+    return impl_ValueColor_2(L);
 }
 
 static int w_CollapsingHeader(lua_State *L)
 {
-	if (lua_isboolean(L, 2))
-	{
-		return impl_CollapsingHeader_2(L);
-	}
-	return impl_CollapsingHeader(L);
+    if (lua_isboolean(L, 2))
+    {
+        return impl_CollapsingHeader_2(L);
+    }
+    return impl_CollapsingHeader(L);
 }
 
 static int w_TreeNodeEx(lua_State *L)
 {
-	if (lua_gettop(L) > 2)
-	{
-		return impl_TreeNodeEx_2(L);
-	}
-	return impl_TreeNodeEx(L);
+    if (lua_gettop(L) > 2)
+    {
+        return impl_TreeNodeEx_2(L);
+    }
+    return impl_TreeNodeEx(L);
 }
 
 static int w_TreeNode(lua_State *L)
 {
-	if (lua_gettop(L) > 1)
-	{
-		return impl_TreeNode_2(L);
-	}
-	return impl_TreeNode(L);
+    if (lua_gettop(L) > 1)
+    {
+        return impl_TreeNode_2(L);
+    }
+    return impl_TreeNode(L);
 }
 
 static int w_Combo(lua_State *L)
 {
-	if (lua_isstring(L, 3))
-	{
-		return impl_Combo_2(L);
-	}
-	return impl_Combo(L);
+    if (lua_isstring(L, 3))
+    {
+        return impl_Combo_2(L);
+    }
+    return impl_Combo(L);
 }
 
 static int w_RadioButton(lua_State *L)
 {
-	if (lua_gettop(L) > 2)
-	{
-		return impl_RadioButton_2(L);
-	}
-	return impl_RadioButton(L);
+    if (lua_gettop(L) > 2)
+    {
+        return impl_RadioButton_2(L);
+    }
+    return impl_RadioButton(L);
 }
 
 static int w_PushID(lua_State *L)
 {
-	if (lua_gettop(L) > 1)
-	{
-		return impl_PushID_2(L);
-	}
-	return impl_PushID(L);
+    if (lua_gettop(L) > 1)
+    {
+        return impl_PushID_2(L);
+    }
+    return impl_PushID(L);
 }
 
 static int w_GetID(lua_State *L)
 {
-	if (lua_gettop(L) > 1)
-	{
-		return impl_GetID_2(L);
-	}
-	return impl_GetID(L);
+    if (lua_gettop(L) > 1)
+    {
+        return impl_GetID_2(L);
+    }
+    return impl_GetID(L);
 }
 
 static int w_PushStyleVar(lua_State *L)
 {
-	if (lua_gettop(L) > 2)
-	{
-		return impl_PushStyleVar_2(L);
-	}
-	return impl_PushStyleVar(L);
+    if (lua_gettop(L) > 2)
+    {
+        return impl_PushStyleVar_2(L);
+    }
+    return impl_PushStyleVar(L);
 }
 
 static int w_SetWindowPos(lua_State *L)
 {
-	if (lua_isstring(L, 1))
-	{
-		return impl_SetWindowPos_2(L);
-	}
-	return impl_SetWindowPos(L);
+    if (lua_isstring(L, 1))
+    {
+        return impl_SetWindowPos_2(L);
+    }
+    return impl_SetWindowPos(L);
 }
 
 static int w_SetWindowSize(lua_State *L)
 {
-	if (lua_isstring(L, 1))
-	{
-		return impl_SetWindowSize_2(L);
-	}
-	return impl_SetWindowSize(L);
+    if (lua_isstring(L, 1))
+    {
+        return impl_SetWindowSize_2(L);
+    }
+    return impl_SetWindowSize(L);
 }
 
 static int w_SetWindowCollapsed(lua_State *L)
 {
-	if (lua_isstring(L, 1))
-	{
-		return impl_SetWindowCollapsed_2(L);
-	}
-	return impl_SetWindowCollapsed(L);
+    if (lua_isstring(L, 1))
+    {
+        return impl_SetWindowCollapsed_2(L);
+    }
+    return impl_SetWindowCollapsed(L);
 }
 
 static int w_SetWindowFocus(lua_State *L)
 {
-	if (lua_isstring(L, 1))
-	{
-		return impl_SetWindowFocus_2(L);
-	}
-	return impl_SetWindowFocus(L);
+    if (lua_isstring(L, 1))
+    {
+        return impl_SetWindowFocus_2(L);
+    }
+    return impl_SetWindowFocus(L);
 }
 
 static int w_BeginChild(lua_State *L)
 {
-	if (lua_isstring(L, 1))
-	{
-		return impl_BeginChild(L);
-	}
-	return impl_BeginChild_2(L);
+    if (lua_isstring(L, 1))
+    {
+        return impl_BeginChild(L);
+    }
+    return impl_BeginChild_2(L);
 }
 
 /*
@@ -557,15 +557,15 @@ static int w_BeginChild(lua_State *L)
 
 static int w_GetStyleColName(lua_State *L)
 {
-	int idx = luaL_checkint(L, 1);
-	lua_pushstring(L, ImGui::GetStyleColName(idx - 1));
-	return 1;
+    int idx = luaL_checkint(L, 1);
+    lua_pushstring(L, ImGui::GetStyleColName(idx - 1));
+    return 1;
 }
 
 static int w_GetStyleColCount(lua_State *L)
 {
-	lua_pushinteger(L, ImGuiCol_COUNT);
-	return 1;
+    lua_pushinteger(L, ImGuiCol_COUNT);
+    return 1;
 }
 
 /*
@@ -575,8 +575,8 @@ static int w_GetStyleColCount(lua_State *L)
 static const struct luaL_Reg imguilib[] = {
 #undef IMGUI_FUNCTION
 #define IMGUI_FUNCTION(name) {#name, impl_##name},
-	// These defines are just redefining everything to nothing so
-	// we can get the function names
+    // These defines are just redefining everything to nothing so
+    // we can get the function names
 #undef DEFAULT_ARG
 #define DEFAULT_ARG(type, name, value)
 #undef TEXTURE_ARG
@@ -734,7 +734,7 @@ static const struct luaL_Reg imguilib[] = {
 };
 
 /*extern "C" {
-	void luax_register(lua_State *L, const char *name, const luaL_Reg *l);
+    void luax_register(lua_State *L, const char *name, const luaL_Reg *l);
 }*/
 
 #define WRAP_ENUM(L, name, val) \
@@ -743,136 +743,136 @@ static const struct luaL_Reg imguilib[] = {
   lua_settable(L, -3);
 
 int luaopen_imgui(lua_State *L) {
-	// Enums not handled by iterator yet
-	lua_newtable(L);
-	WRAP_ENUM(L, NoTitleBar, ImGuiWindowFlags_NoTitleBar);
-	WRAP_ENUM(L, NoResize, ImGuiWindowFlags_NoResize);
-	WRAP_ENUM(L, NoMove, ImGuiWindowFlags_NoMove);
-	WRAP_ENUM(L, NoScrollbar, ImGuiWindowFlags_NoScrollbar);
-	WRAP_ENUM(L, NoScrollWithMouse, ImGuiWindowFlags_NoScrollWithMouse);
-	WRAP_ENUM(L, NoCollapse, ImGuiWindowFlags_NoCollapse);
-	WRAP_ENUM(L, AlwaysAutoResize, ImGuiWindowFlags_AlwaysAutoResize);
-	WRAP_ENUM(L, ShowBorders, ImGuiWindowFlags_ShowBorders);
-	WRAP_ENUM(L, NoSavedSettings, ImGuiWindowFlags_NoSavedSettings);
-	WRAP_ENUM(L, NoInputs, ImGuiWindowFlags_NoInputs);
-	WRAP_ENUM(L, MenuBar, ImGuiWindowFlags_MenuBar);
-	WRAP_ENUM(L, HorizontalScrollbar, ImGuiWindowFlags_HorizontalScrollbar);
-	WRAP_ENUM(L, NoFocusOnAppearing, ImGuiWindowFlags_NoFocusOnAppearing);
-	WRAP_ENUM(L, NoBringToFrontOnFocus, ImGuiWindowFlags_NoBringToFrontOnFocus);
-	WRAP_ENUM(L, ChildWindow, ImGuiWindowFlags_ChildWindow);
-	WRAP_ENUM(L, ChildWindowAutoFitX, ImGuiWindowFlags_ChildWindowAutoFitX);
-	WRAP_ENUM(L, ChildWindowAutoFitY, ImGuiWindowFlags_ChildWindowAutoFitY);
-	WRAP_ENUM(L, ComboBox, ImGuiWindowFlags_ComboBox);
-	WRAP_ENUM(L, Tooltip, ImGuiWindowFlags_Tooltip);
-	WRAP_ENUM(L, Popup, ImGuiWindowFlags_Popup);
-	WRAP_ENUM(L, Modal, ImGuiWindowFlags_Modal);
-	WRAP_ENUM(L, ChildMenu, ImGuiWindowFlags_ChildMenu);
-	WRAP_ENUM(L, CharsDecimal, ImGuiInputTextFlags_CharsDecimal);
-	WRAP_ENUM(L, CharsHexadecimal, ImGuiInputTextFlags_CharsHexadecimal);
-	WRAP_ENUM(L, CharsUppercase, ImGuiInputTextFlags_CharsUppercase);
-	WRAP_ENUM(L, CharsNoBlank, ImGuiInputTextFlags_CharsNoBlank);
-	WRAP_ENUM(L, AutoSelectAll, ImGuiInputTextFlags_AutoSelectAll);
-	WRAP_ENUM(L, EnterReturnsTrue, ImGuiInputTextFlags_EnterReturnsTrue);
-	WRAP_ENUM(L, CallbackCompletion, ImGuiInputTextFlags_CallbackCompletion);
-	WRAP_ENUM(L, CallbackHistory, ImGuiInputTextFlags_CallbackHistory);
-	WRAP_ENUM(L, CallbackAlways, ImGuiInputTextFlags_CallbackAlways);
-	WRAP_ENUM(L, CallbackCharFilter, ImGuiInputTextFlags_CallbackCharFilter);
-	WRAP_ENUM(L, AllowTabInput, ImGuiInputTextFlags_AllowTabInput);
-	WRAP_ENUM(L, CtrlEnterForNewLine, ImGuiInputTextFlags_CtrlEnterForNewLine);
-	WRAP_ENUM(L, NoHorizontalScroll, ImGuiInputTextFlags_NoHorizontalScroll);
-	WRAP_ENUM(L, AlwaysInsertMode, ImGuiInputTextFlags_AlwaysInsertMode);
-	WRAP_ENUM(L, ReadOnly, ImGuiInputTextFlags_ReadOnly);
-	WRAP_ENUM(L, Password, ImGuiInputTextFlags_Password);
-	WRAP_ENUM(L, Multiline, ImGuiInputTextFlags_Multiline);
-	WRAP_ENUM(L, DontClosePopups, ImGuiSelectableFlags_DontClosePopups);
-	WRAP_ENUM(L, SpanAllColumns, ImGuiSelectableFlags_SpanAllColumns);
-	WRAP_ENUM(L, Tab, ImGuiKey_Tab);
-	WRAP_ENUM(L, LeftArrow, ImGuiKey_LeftArrow);
-	WRAP_ENUM(L, RightArrow, ImGuiKey_RightArrow);
-	WRAP_ENUM(L, UpArrow, ImGuiKey_UpArrow);
-	WRAP_ENUM(L, DownArrow, ImGuiKey_DownArrow);
-	WRAP_ENUM(L, PageUp, ImGuiKey_PageUp);
-	WRAP_ENUM(L, PageDown, ImGuiKey_PageDown);
-	WRAP_ENUM(L, Home, ImGuiKey_Home);
-	WRAP_ENUM(L, Always, ImGuiSetCond_Always);
-	WRAP_ENUM(L, Once, ImGuiSetCond_Once);
-	WRAP_ENUM(L, FirstUseEver, ImGuiSetCond_FirstUseEver);
-	WRAP_ENUM(L, Appearing, ImGuiSetCond_Appearing);
-	WRAP_ENUM(L, Text, ImGuiCol_Text);
-	WRAP_ENUM(L, TextDisabled, ImGuiCol_TextDisabled);
-	WRAP_ENUM(L, WindowBg, ImGuiCol_WindowBg);
-	WRAP_ENUM(L, ChildWindowBg, ImGuiCol_ChildWindowBg);
-	WRAP_ENUM(L, PopupBg, ImGuiCol_PopupBg);
-	WRAP_ENUM(L, Border, ImGuiCol_Border);
-	WRAP_ENUM(L, BorderShadow, ImGuiCol_BorderShadow);
-	WRAP_ENUM(L, FrameBg, ImGuiCol_FrameBg);
-	WRAP_ENUM(L, FrameBgHovered, ImGuiCol_FrameBgHovered);
-	WRAP_ENUM(L, FrameBgActive, ImGuiCol_FrameBgActive);
-	WRAP_ENUM(L, TitleBg, ImGuiCol_TitleBg);
-	WRAP_ENUM(L, TitleBgCollapsed, ImGuiCol_TitleBgCollapsed);
-	WRAP_ENUM(L, TitleBgActive, ImGuiCol_TitleBgActive);
-	WRAP_ENUM(L, MenuBarBg, ImGuiCol_MenuBarBg);
-	WRAP_ENUM(L, ScrollbarBg, ImGuiCol_ScrollbarBg);
-	WRAP_ENUM(L, ScrollbarGrab, ImGuiCol_ScrollbarGrab);
-	WRAP_ENUM(L, ScrollbarGrabHovered, ImGuiCol_ScrollbarGrabHovered);
-	WRAP_ENUM(L, ScrollbarGrabActive, ImGuiCol_ScrollbarGrabActive);
-	WRAP_ENUM(L, ComboBg, ImGuiCol_ComboBg);
-	WRAP_ENUM(L, CheckMark, ImGuiCol_CheckMark);
-	WRAP_ENUM(L, SliderGrab, ImGuiCol_SliderGrab);
-	WRAP_ENUM(L, SliderGrabActive, ImGuiCol_SliderGrabActive);
-	WRAP_ENUM(L, Button, ImGuiCol_Button);
-	WRAP_ENUM(L, ButtonHovered, ImGuiCol_ButtonHovered);
-	WRAP_ENUM(L, ButtonActive, ImGuiCol_ButtonActive);
-	WRAP_ENUM(L, Header, ImGuiCol_Header);
-	WRAP_ENUM(L, HeaderHovered, ImGuiCol_HeaderHovered);
-	WRAP_ENUM(L, HeaderActive, ImGuiCol_HeaderActive);
-	WRAP_ENUM(L, Column, ImGuiCol_Column);
-	WRAP_ENUM(L, ColumnHovered, ImGuiCol_ColumnHovered);
-	WRAP_ENUM(L, ColumnActive, ImGuiCol_ColumnActive);
-	WRAP_ENUM(L, ResizeGrip, ImGuiCol_ResizeGrip);
-	WRAP_ENUM(L, ResizeGripHovered, ImGuiCol_ResizeGripHovered);
-	WRAP_ENUM(L, ResizeGripActive, ImGuiCol_ResizeGripActive);
-	WRAP_ENUM(L, CloseButton, ImGuiCol_CloseButton);
-	WRAP_ENUM(L, CloseButtonHovered, ImGuiCol_CloseButtonHovered);
-	WRAP_ENUM(L, CloseButtonActive, ImGuiCol_CloseButtonActive);
-	WRAP_ENUM(L, PlotLines, ImGuiCol_PlotLines);
-	WRAP_ENUM(L, PlotLinesHovered, ImGuiCol_PlotLinesHovered);
-	WRAP_ENUM(L, PlotHistogram, ImGuiCol_PlotHistogram);
-	WRAP_ENUM(L, PlotHistogramHovered, ImGuiCol_PlotHistogramHovered);
-	WRAP_ENUM(L, TextSelectedBg, ImGuiCol_TextSelectedBg);
-	WRAP_ENUM(L, ModalWindowDarkening, ImGuiCol_ModalWindowDarkening);
-	WRAP_ENUM(L, Alpha, ImGuiStyleVar_Alpha);
-	WRAP_ENUM(L, WindowPadding, ImGuiStyleVar_WindowPadding);
-	WRAP_ENUM(L, WindowRounding, ImGuiStyleVar_WindowRounding);
-	WRAP_ENUM(L, WindowMinSize, ImGuiStyleVar_WindowMinSize);
-	WRAP_ENUM(L, ChildWindowRounding, ImGuiStyleVar_ChildWindowRounding);
-	WRAP_ENUM(L, FramePadding, ImGuiStyleVar_FramePadding);
-	WRAP_ENUM(L, FrameRounding, ImGuiStyleVar_FrameRounding);
-	WRAP_ENUM(L, ItemSpacing, ImGuiStyleVar_ItemSpacing);
-	WRAP_ENUM(L, ItemInnerSpacing, ImGuiStyleVar_ItemInnerSpacing);
-	WRAP_ENUM(L, IndentSpacing, ImGuiStyleVar_IndentSpacing);
-	WRAP_ENUM(L, GrabMinSize, ImGuiStyleVar_GrabMinSize);
+    // Enums not handled by iterator yet
+    lua_newtable(L);
+    WRAP_ENUM(L, NoTitleBar, ImGuiWindowFlags_NoTitleBar);
+    WRAP_ENUM(L, NoResize, ImGuiWindowFlags_NoResize);
+    WRAP_ENUM(L, NoMove, ImGuiWindowFlags_NoMove);
+    WRAP_ENUM(L, NoScrollbar, ImGuiWindowFlags_NoScrollbar);
+    WRAP_ENUM(L, NoScrollWithMouse, ImGuiWindowFlags_NoScrollWithMouse);
+    WRAP_ENUM(L, NoCollapse, ImGuiWindowFlags_NoCollapse);
+    WRAP_ENUM(L, AlwaysAutoResize, ImGuiWindowFlags_AlwaysAutoResize);
+    WRAP_ENUM(L, ShowBorders, ImGuiWindowFlags_ShowBorders);
+    WRAP_ENUM(L, NoSavedSettings, ImGuiWindowFlags_NoSavedSettings);
+    WRAP_ENUM(L, NoInputs, ImGuiWindowFlags_NoInputs);
+    WRAP_ENUM(L, MenuBar, ImGuiWindowFlags_MenuBar);
+    WRAP_ENUM(L, HorizontalScrollbar, ImGuiWindowFlags_HorizontalScrollbar);
+    WRAP_ENUM(L, NoFocusOnAppearing, ImGuiWindowFlags_NoFocusOnAppearing);
+    WRAP_ENUM(L, NoBringToFrontOnFocus, ImGuiWindowFlags_NoBringToFrontOnFocus);
+    WRAP_ENUM(L, ChildWindow, ImGuiWindowFlags_ChildWindow);
+    WRAP_ENUM(L, ChildWindowAutoFitX, ImGuiWindowFlags_ChildWindowAutoFitX);
+    WRAP_ENUM(L, ChildWindowAutoFitY, ImGuiWindowFlags_ChildWindowAutoFitY);
+    WRAP_ENUM(L, ComboBox, ImGuiWindowFlags_ComboBox);
+    WRAP_ENUM(L, Tooltip, ImGuiWindowFlags_Tooltip);
+    WRAP_ENUM(L, Popup, ImGuiWindowFlags_Popup);
+    WRAP_ENUM(L, Modal, ImGuiWindowFlags_Modal);
+    WRAP_ENUM(L, ChildMenu, ImGuiWindowFlags_ChildMenu);
+    WRAP_ENUM(L, CharsDecimal, ImGuiInputTextFlags_CharsDecimal);
+    WRAP_ENUM(L, CharsHexadecimal, ImGuiInputTextFlags_CharsHexadecimal);
+    WRAP_ENUM(L, CharsUppercase, ImGuiInputTextFlags_CharsUppercase);
+    WRAP_ENUM(L, CharsNoBlank, ImGuiInputTextFlags_CharsNoBlank);
+    WRAP_ENUM(L, AutoSelectAll, ImGuiInputTextFlags_AutoSelectAll);
+    WRAP_ENUM(L, EnterReturnsTrue, ImGuiInputTextFlags_EnterReturnsTrue);
+    WRAP_ENUM(L, CallbackCompletion, ImGuiInputTextFlags_CallbackCompletion);
+    WRAP_ENUM(L, CallbackHistory, ImGuiInputTextFlags_CallbackHistory);
+    WRAP_ENUM(L, CallbackAlways, ImGuiInputTextFlags_CallbackAlways);
+    WRAP_ENUM(L, CallbackCharFilter, ImGuiInputTextFlags_CallbackCharFilter);
+    WRAP_ENUM(L, AllowTabInput, ImGuiInputTextFlags_AllowTabInput);
+    WRAP_ENUM(L, CtrlEnterForNewLine, ImGuiInputTextFlags_CtrlEnterForNewLine);
+    WRAP_ENUM(L, NoHorizontalScroll, ImGuiInputTextFlags_NoHorizontalScroll);
+    WRAP_ENUM(L, AlwaysInsertMode, ImGuiInputTextFlags_AlwaysInsertMode);
+    WRAP_ENUM(L, ReadOnly, ImGuiInputTextFlags_ReadOnly);
+    WRAP_ENUM(L, Password, ImGuiInputTextFlags_Password);
+    WRAP_ENUM(L, Multiline, ImGuiInputTextFlags_Multiline);
+    WRAP_ENUM(L, DontClosePopups, ImGuiSelectableFlags_DontClosePopups);
+    WRAP_ENUM(L, SpanAllColumns, ImGuiSelectableFlags_SpanAllColumns);
+    WRAP_ENUM(L, Tab, ImGuiKey_Tab);
+    WRAP_ENUM(L, LeftArrow, ImGuiKey_LeftArrow);
+    WRAP_ENUM(L, RightArrow, ImGuiKey_RightArrow);
+    WRAP_ENUM(L, UpArrow, ImGuiKey_UpArrow);
+    WRAP_ENUM(L, DownArrow, ImGuiKey_DownArrow);
+    WRAP_ENUM(L, PageUp, ImGuiKey_PageUp);
+    WRAP_ENUM(L, PageDown, ImGuiKey_PageDown);
+    WRAP_ENUM(L, Home, ImGuiKey_Home);
+    WRAP_ENUM(L, Always, ImGuiSetCond_Always);
+    WRAP_ENUM(L, Once, ImGuiSetCond_Once);
+    WRAP_ENUM(L, FirstUseEver, ImGuiSetCond_FirstUseEver);
+    WRAP_ENUM(L, Appearing, ImGuiSetCond_Appearing);
+    WRAP_ENUM(L, Text, ImGuiCol_Text);
+    WRAP_ENUM(L, TextDisabled, ImGuiCol_TextDisabled);
+    WRAP_ENUM(L, WindowBg, ImGuiCol_WindowBg);
+    WRAP_ENUM(L, ChildWindowBg, ImGuiCol_ChildWindowBg);
+    WRAP_ENUM(L, PopupBg, ImGuiCol_PopupBg);
+    WRAP_ENUM(L, Border, ImGuiCol_Border);
+    WRAP_ENUM(L, BorderShadow, ImGuiCol_BorderShadow);
+    WRAP_ENUM(L, FrameBg, ImGuiCol_FrameBg);
+    WRAP_ENUM(L, FrameBgHovered, ImGuiCol_FrameBgHovered);
+    WRAP_ENUM(L, FrameBgActive, ImGuiCol_FrameBgActive);
+    WRAP_ENUM(L, TitleBg, ImGuiCol_TitleBg);
+    WRAP_ENUM(L, TitleBgCollapsed, ImGuiCol_TitleBgCollapsed);
+    WRAP_ENUM(L, TitleBgActive, ImGuiCol_TitleBgActive);
+    WRAP_ENUM(L, MenuBarBg, ImGuiCol_MenuBarBg);
+    WRAP_ENUM(L, ScrollbarBg, ImGuiCol_ScrollbarBg);
+    WRAP_ENUM(L, ScrollbarGrab, ImGuiCol_ScrollbarGrab);
+    WRAP_ENUM(L, ScrollbarGrabHovered, ImGuiCol_ScrollbarGrabHovered);
+    WRAP_ENUM(L, ScrollbarGrabActive, ImGuiCol_ScrollbarGrabActive);
+    WRAP_ENUM(L, ComboBg, ImGuiCol_ComboBg);
+    WRAP_ENUM(L, CheckMark, ImGuiCol_CheckMark);
+    WRAP_ENUM(L, SliderGrab, ImGuiCol_SliderGrab);
+    WRAP_ENUM(L, SliderGrabActive, ImGuiCol_SliderGrabActive);
+    WRAP_ENUM(L, Button, ImGuiCol_Button);
+    WRAP_ENUM(L, ButtonHovered, ImGuiCol_ButtonHovered);
+    WRAP_ENUM(L, ButtonActive, ImGuiCol_ButtonActive);
+    WRAP_ENUM(L, Header, ImGuiCol_Header);
+    WRAP_ENUM(L, HeaderHovered, ImGuiCol_HeaderHovered);
+    WRAP_ENUM(L, HeaderActive, ImGuiCol_HeaderActive);
+    WRAP_ENUM(L, Column, ImGuiCol_Column);
+    WRAP_ENUM(L, ColumnHovered, ImGuiCol_ColumnHovered);
+    WRAP_ENUM(L, ColumnActive, ImGuiCol_ColumnActive);
+    WRAP_ENUM(L, ResizeGrip, ImGuiCol_ResizeGrip);
+    WRAP_ENUM(L, ResizeGripHovered, ImGuiCol_ResizeGripHovered);
+    WRAP_ENUM(L, ResizeGripActive, ImGuiCol_ResizeGripActive);
+    WRAP_ENUM(L, CloseButton, ImGuiCol_CloseButton);
+    WRAP_ENUM(L, CloseButtonHovered, ImGuiCol_CloseButtonHovered);
+    WRAP_ENUM(L, CloseButtonActive, ImGuiCol_CloseButtonActive);
+    WRAP_ENUM(L, PlotLines, ImGuiCol_PlotLines);
+    WRAP_ENUM(L, PlotLinesHovered, ImGuiCol_PlotLinesHovered);
+    WRAP_ENUM(L, PlotHistogram, ImGuiCol_PlotHistogram);
+    WRAP_ENUM(L, PlotHistogramHovered, ImGuiCol_PlotHistogramHovered);
+    WRAP_ENUM(L, TextSelectedBg, ImGuiCol_TextSelectedBg);
+    WRAP_ENUM(L, ModalWindowDarkening, ImGuiCol_ModalWindowDarkening);
+    WRAP_ENUM(L, Alpha, ImGuiStyleVar_Alpha);
+    WRAP_ENUM(L, WindowPadding, ImGuiStyleVar_WindowPadding);
+    WRAP_ENUM(L, WindowRounding, ImGuiStyleVar_WindowRounding);
+    WRAP_ENUM(L, WindowMinSize, ImGuiStyleVar_WindowMinSize);
+    WRAP_ENUM(L, ChildWindowRounding, ImGuiStyleVar_ChildWindowRounding);
+    WRAP_ENUM(L, FramePadding, ImGuiStyleVar_FramePadding);
+    WRAP_ENUM(L, FrameRounding, ImGuiStyleVar_FrameRounding);
+    WRAP_ENUM(L, ItemSpacing, ImGuiStyleVar_ItemSpacing);
+    WRAP_ENUM(L, ItemInnerSpacing, ImGuiStyleVar_ItemInnerSpacing);
+    WRAP_ENUM(L, IndentSpacing, ImGuiStyleVar_IndentSpacing);
+    WRAP_ENUM(L, GrabMinSize, ImGuiStyleVar_GrabMinSize);
 
-	WRAP_ENUM(L, Selected, ImGuiTreeNodeFlags_Selected);
-	WRAP_ENUM(L, Framed, ImGuiTreeNodeFlags_Framed);
-	WRAP_ENUM(L, AllowOverlapMode, ImGuiTreeNodeFlags_AllowOverlapMode);
-	WRAP_ENUM(L, NoTreePushOnOpen, ImGuiTreeNodeFlags_NoTreePushOnOpen);
-	WRAP_ENUM(L, NoAutoOpenOnLog, ImGuiTreeNodeFlags_NoAutoOpenOnLog);
-	WRAP_ENUM(L, DefaultOpen, ImGuiTreeNodeFlags_DefaultOpen);
-	WRAP_ENUM(L, OpenOnDoubleClick, ImGuiTreeNodeFlags_OpenOnDoubleClick);
-	WRAP_ENUM(L, OpenOnArrow, ImGuiTreeNodeFlags_OpenOnArrow);
-	WRAP_ENUM(L, Leaf, ImGuiTreeNodeFlags_Leaf);
-	WRAP_ENUM(L, Bullet, ImGuiTreeNodeFlags_Bullet);
+    WRAP_ENUM(L, Selected, ImGuiTreeNodeFlags_Selected);
+    WRAP_ENUM(L, Framed, ImGuiTreeNodeFlags_Framed);
+    WRAP_ENUM(L, AllowOverlapMode, ImGuiTreeNodeFlags_AllowOverlapMode);
+    WRAP_ENUM(L, NoTreePushOnOpen, ImGuiTreeNodeFlags_NoTreePushOnOpen);
+    WRAP_ENUM(L, NoAutoOpenOnLog, ImGuiTreeNodeFlags_NoAutoOpenOnLog);
+    WRAP_ENUM(L, DefaultOpen, ImGuiTreeNodeFlags_DefaultOpen);
+    WRAP_ENUM(L, OpenOnDoubleClick, ImGuiTreeNodeFlags_OpenOnDoubleClick);
+    WRAP_ENUM(L, OpenOnArrow, ImGuiTreeNodeFlags_OpenOnArrow);
+    WRAP_ENUM(L, Leaf, ImGuiTreeNodeFlags_Leaf);
+    WRAP_ENUM(L, Bullet, ImGuiTreeNodeFlags_Bullet);
 
-	// Docks
-	/*WRAP_ENUM(L, Left, ImGuiDockSlot_Left);
-	WRAP_ENUM(L, Right, ImGuiDockSlot_Right);
-	WRAP_ENUM(L, Top, ImGuiDockSlot_Top);
-	WRAP_ENUM(L, Bottom, ImGuiDockSlot_Bottom);
-	WRAP_ENUM(L, Tab, ImGuiDockSlot_Tab);
-	WRAP_ENUM(L, Float, ImGuiDockSlot_Float);
-	WRAP_ENUM(L, None, ImGuiDockSlot_None);*/
+    // Docks
+    /*WRAP_ENUM(L, Left, ImGuiDockSlot_Left);
+    WRAP_ENUM(L, Right, ImGuiDockSlot_Right);
+    WRAP_ENUM(L, Top, ImGuiDockSlot_Top);
+    WRAP_ENUM(L, Bottom, ImGuiDockSlot_Bottom);
+    WRAP_ENUM(L, Tab, ImGuiDockSlot_Tab);
+    WRAP_ENUM(L, Float, ImGuiDockSlot_Float);
+    WRAP_ENUM(L, None, ImGuiDockSlot_None);*/
 
-	luaL_openlib(L, "imgui", imguilib, 1);
-	return 1;
+    luaL_openlib(L, "imgui", imguilib, 1);
+    return 1;
 }

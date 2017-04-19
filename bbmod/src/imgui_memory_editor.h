@@ -132,10 +132,10 @@ struct MemoryEditor
                     }
                     else
                     {
-						auto pid = GetCurrentProcess();
-						SIZE_T read;
-						char buf;
-						ReadProcessMemory(pid, mem_data + addr, &buf, 1, &read);
+                        auto pid = GetCurrentProcess();
+                        SIZE_T read;
+                        char buf;
+                        ReadProcessMemory(pid, mem_data + addr, &buf, 1, &read);
                         ImGui::Text("%02X ", buf & 0xFF);
                         if (AllowEdits && ImGui::IsItemHovered() && ImGui::IsMouseClicked(0))
                         {
@@ -158,10 +158,10 @@ struct MemoryEditor
                 addr = line_i * Rows;
                 for (int n = 0; n < Rows && addr < mem_size; n++, addr++)
                 {
-					auto pid = GetCurrentProcess();
-					SIZE_T read;
-					char buf;
-					ReadProcessMemory(pid, mem_data + addr, &buf, 1, &read);
+                    auto pid = GetCurrentProcess();
+                    SIZE_T read;
+                    char buf;
+                    ReadProcessMemory(pid, mem_data + addr, &buf, 1, &read);
                     if (n > 0) ImGui::SameLine();
                     int c = buf;
                     ImGui::Text("%c", (c >= 32 && c < 128) ? c : '.');
@@ -169,7 +169,7 @@ struct MemoryEditor
             }
             clipper.End();
             ImGui::PopStyleVar(2);
-            
+
             ImGui::EndChild();
 
             if (data_next && DataEditingAddr < mem_size)

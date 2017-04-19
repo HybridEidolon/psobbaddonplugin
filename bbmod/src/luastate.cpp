@@ -13,36 +13,36 @@
 struct lua_State* g_LuaState = nullptr;
 
 struct KeyEvent {
-	bool isPressed;
-	int keyCode;
+    bool isPressed;
+    int keyCode;
 };
 
 static std::vector<KeyEvent> key_events;
 void psolua_push_key_pressed(int key_code) {
-	KeyEvent e{};
-	e.isPressed = true;
-	e.keyCode = key_code;
-	key_events.push_back(e);
+    KeyEvent e{};
+    e.isPressed = true;
+    e.keyCode = key_code;
+    key_events.push_back(e);
 }
 
 void psolua_push_key_released(int key_code) {
-	KeyEvent e{};
-	e.isPressed = false;
-	e.keyCode = key_code;
-	key_events.push_back(e);
+    KeyEvent e{};
+    e.isPressed = false;
+    e.keyCode = key_code;
+    key_events.push_back(e);
 }
 
 void psolua_process_key_events(void) {
-	int evts = key_events.size();
+    int evts = key_events.size();
 
-	for (auto e : key_events) {
-		if (e.isPressed) {
-			psoluah_KeyPressed(e.keyCode);
-		}
-		else {
-			psoluah_KeyReleased(e.keyCode);
-		}
-	}
+    for (auto e : key_events) {
+        if (e.isPressed) {
+            psoluah_KeyPressed(e.keyCode);
+        }
+        else {
+            psoluah_KeyReleased(e.keyCode);
+        }
+    }
 
-	key_events.clear();
+    key_events.clear();
 }
