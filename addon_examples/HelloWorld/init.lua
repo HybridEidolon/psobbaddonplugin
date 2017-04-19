@@ -16,5 +16,8 @@ local function init()
 end
 
 return {
+  __addon = {
+    init = init
+  },
   some_publicly_exported_function = some_publicly_exported_function
 }
