@@ -56,9 +56,6 @@
     <ClCompile Include="src\util.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\ui.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\imgui_dinput8_dev.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
