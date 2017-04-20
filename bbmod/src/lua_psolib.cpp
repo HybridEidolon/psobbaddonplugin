@@ -124,7 +124,15 @@ void psolua_initialize_state(void) {
 
     luaL_openlibs(g_LuaState);
     psolua_load_library(g_LuaState);
-
+	sol::protected_function_result res = lua.do_file("addons/init.lua");
+	if (res.status() != sol::call_status::ok) {
+		sol::error what = res;
+		g_log << (int) res.status() << std::endl;
+		g_log << what.what() << std::endl;
+		lua["pso"]["error_handler"](what);
+		MessageBoxA(nullptr, "Failed to load init.lua", "Lua error", 0);
+		exit(1);
+	}
     psoluah_Init();
 
     psolua_initialize_on_next_frame = false;

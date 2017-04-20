@@ -4,6 +4,19 @@ local present_hooks = {}
 local key_pressed_hooks = {}
 local key_released_hooks = {}
 
+local function set_addon_enabled(path, enabled)
+  addons[path].meta.enabled = enabled
+  if (present_hooks[path]) then
+    present_hooks[path].enabled = enabled
+  end
+  if (key_pressed_hooks[path]) then
+    key_pressed_hooks[path].enabled = enabled
+  end
+  if (key_released_hooks[path]) then
+    key_released_hooks[path].enabled = enabled
+  end
+end
+
 local function make_hook(fn)
   return {
     enabled = true,
@@ -16,9 +29,9 @@ local function on_init()
   local loaded_addons = {}
 
   -- require each module
-  for _, v in ipairs(dirs) do
+  for v in dirs do
     local status, module = pcall(function() return require(v); end)
-    if (status and module.__addon ~= nil and type(addon.module.__addon.init) == 'function') then
+    if (status and module.__addon ~= nil and type(module.__addon.init) == 'function') then
       loaded_addons[v] = {
         path = v,
         module = module
@@ -67,9 +80,14 @@ local function on_init()
 end
 
 local function on_present()
-  for _, v in pairs(present_hooks) do
+  for a, v in pairs(present_hooks) do
     if (v.enabled) then
-      v.fn()
+      local status, ret = pcall(v.fn)
+      if (not status) then
+        print('Addon ' .. a .. ' present handler errored; disabling addon')
+        pso.error_handler(ret)
+        set_addon_enabled(a, false)
+      end
     end
   end
 end
@@ -77,7 +95,12 @@ end
 local function on_key_pressed(key)
   for _, v in pairs(key_pressed_hooks) do
     if (v.enabled) then
-      v.fn(key)
+      local status, ret = pcall(function() v.fn(key); end)
+      if (not status) then
+        print('Addon ' .. a .. ' key_pressed handler errored; disabling addon')
+        pso.error_handler(ret)
+        set_addon_enabled(a, false)
+      end
     end
   end
 end
@@ -85,7 +108,12 @@ end
 local function on_key_released(key)
   for _, v in pairs(key_released_hooks) do
     if (v.enabled) then
-      v.fn(key)
+      local status, ret = pcall(function() v.fn(key); end)
+      if (not status) then
+        print('Addon ' .. a .. ' key_released handler errored; disabling addon')
+        pso.error_handler(ret)
+        set_addon_enabled(a, false)
+      end
     end
   end
 end
@@ -94,17 +122,12 @@ local function get_addons()
   return addons
 end
 
-local function set_addon_enabled(path, enabled)
-  addons[path].meta.enabled = enabled
-  present_hooks[path].enabled = enabled
-  key_pressed_hooks[path].enabled = enabled
-  key_released_hooks[path].enabled = enabled
-end
 
 return {
   on_init = on_init,
   on_present = on_present,
   on_key_pressed = on_key_pressed,
   on_key_released = on_key_released,
-  get_addons = get_addons
+  get_addons = get_addons,
+  set_addon_enabled = set_addon_enabled
 }
