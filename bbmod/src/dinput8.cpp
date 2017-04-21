@@ -18,13 +18,13 @@
 #include "lua_psolib.h"
 #include "sol.hpp"
 
-#define PSOBB_WINDOW_TITLE_ADDR 0x00ACBE70 - 0x00400000 + base
-#define PSOBB_MAIN (void*)(0x0082D050 - 0x00400000 + base)
-#define PSOBB_INITD3D (tPSOBB_InitD3D)(0x00838CA0 - 0x00400000 + base)
-#define PSOBB_DIRECT3D8_PTR (IDirect3D8**)(0x00ACD4A0 - 0x00400000 + base)
-#define PSOBB_DIRECT3DDEVICE8_PTR (IDirect3DDevice8**)(0x00ACD528 - 0x00400000 + base)
-#define PSOBB_DIRECTINPUT8_PTR (IDirectInput8A**)(0x00ACBEDC - 0x00400000 + base)
-#define PSOBB_HWND_PTR (HWND*)(0x00ACBED8 - 0x00400000 + base)
+#define PSOBB_WINDOW_TITLE_ADDR 0x00ACBE70 - 0x00400000 + g_PSOBaseAddress
+#define PSOBB_MAIN (void*)(0x0082D050 - 0x00400000 + g_PSOBaseAddress)
+#define PSOBB_INITD3D (tPSOBB_InitD3D)(0x00838CA0 - 0x00400000 + g_PSOBaseAddress)
+#define PSOBB_DIRECT3D8_PTR (IDirect3D8**)(0x00ACD4A0 - 0x00400000 + g_PSOBaseAddress)
+#define PSOBB_DIRECT3DDEVICE8_PTR (IDirect3DDevice8**)(0x00ACD528 - 0x00400000 + g_PSOBaseAddress)
+#define PSOBB_DIRECTINPUT8_PTR (IDirectInput8A**)(0x00ACBEDC - 0x00400000 + g_PSOBaseAddress)
+#define PSOBB_HWND_PTR (HWND*)(0x00ACBED8 - 0x00400000 + g_PSOBaseAddress)
 
 #define DO_HOOKS true
 
@@ -42,7 +42,6 @@ static tPSOBB_InitD3D oPSOBB_InitD3D = nullptr;
 
 static IDirect3D8* d3dDevicePtr = nullptr;
 
-static DWORD base = 0;
 BYTE *codeBase, *codeEnd, *dataBase, *dataEnd;
 
 static IDirectInput8A* dinput8AModule = nullptr;
@@ -62,13 +61,13 @@ void __fastcall PSOBB_InitD3D(void* self, void* notused) {
 }
 
 void Initialize() {
-    base = (DWORD)GetModuleHandle(nullptr);
-    auto idh = (PIMAGE_DOS_HEADER)base;
-    auto inh = (PIMAGE_NT_HEADERS)(base + idh->e_lfanew);
+    g_PSOBaseAddress = (DWORD)GetModuleHandle(nullptr);
+    auto idh = (PIMAGE_DOS_HEADER)g_PSOBaseAddress;
+    auto inh = (PIMAGE_NT_HEADERS)(g_PSOBaseAddress + idh->e_lfanew);
     auto ioh = &inh->OptionalHeader;
-    codeBase = (BYTE*)(base + ioh->BaseOfCode);
+    codeBase = (BYTE*)(g_PSOBaseAddress + ioh->BaseOfCode);
     codeEnd = codeBase + ioh->SizeOfCode;
-    dataBase = (BYTE*)(base + ioh->BaseOfData);
+    dataBase = (BYTE*)(g_PSOBaseAddress + ioh->BaseOfData);
     dataEnd = dataBase + ioh->SizeOfInitializedData;
 
     MH_Initialize();

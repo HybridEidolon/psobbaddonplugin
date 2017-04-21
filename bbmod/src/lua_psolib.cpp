@@ -16,6 +16,8 @@ static sol::table psolualib_read_mem(sol::table t, int memory_address, int len);
 
 bool psolua_initialize_on_next_frame = false;
 
+DWORD g_PSOBaseAddress;
+
 // Catch C++ exceptions and convert them to Lua error messages.
 // Customize as needed for your own exception classes.
 static int wrap_exceptions(lua_State *L, lua_CFunction f) {
@@ -54,9 +56,11 @@ static int psolua_print(lua_State *L) {
 
     for (int i = 1; i <= nargs; i++) {
         sol::object o = sol::stack::get<sol::object>(lua, i);
+		if (i > 1) g_log << "\t";
         std::string out = lua["tostring"](o);
-        g_log << out << std::endl;
+		g_log << out;
     }
+	g_log << std::endl;
 
     return 0;
 }
@@ -95,6 +99,8 @@ void psolua_load_library(lua_State * L) {
     psoTable["read_cstr"] = psolualib_read_cstr;
     psoTable["read_wstr"] = psolualib_read_wstr;
     psoTable["read_mem"] = psolualib_read_mem;
+	psoTable["base_address"] = g_PSOBaseAddress;
+	lua["print"]("PSOBB Base address is ", g_PSOBaseAddress);
 
     // Exception handling
     lua_pushlightuserdata(L, (void*)wrap_exceptions);
