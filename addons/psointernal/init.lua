@@ -47,9 +47,10 @@ local function on_init()
       if (success) then
         addon.meta = {
           path = addon.path,
-          name = val.name,
-          version = val.version,
-          author = val.author,
+          name = val.name or addon.path,
+          version = val.version or '?',
+          author = val.author or '?',
+          description = val.description,
           loaded = true,
           enabled = true
         }
