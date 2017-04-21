@@ -25,11 +25,11 @@ local function make_hook(fn)
 end
 
 local function on_init()
-  local dirs = io.popen('dir addons /b /ad'):lines()
+  local dirs = pso.list_addon_directories()
   local loaded_addons = {}
 
   -- require each module
-  for v in dirs do
+  for _, v in ipairs(dirs) do
     local status, module = pcall(function() return require(v); end)
     if (status and module.__addon ~= nil and type(module.__addon.init) == 'function') then
       loaded_addons[v] = {

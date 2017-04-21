@@ -13,6 +13,7 @@ static int psolua_print(lua_State *L);
 static std::string psolualib_read_cstr(int memory_address, int len = 2048);
 static std::string psolualib_read_wstr(int memory_address, int len = 1024);
 static sol::table psolualib_read_mem(sol::table t, int memory_address, int len);
+static sol::table psolualib_list_addons();
 
 bool psolua_initialize_on_next_frame = false;
 
@@ -56,11 +57,11 @@ static int psolua_print(lua_State *L) {
 
     for (int i = 1; i <= nargs; i++) {
         sol::object o = sol::stack::get<sol::object>(lua, i);
-		if (i > 1) g_log << "\t";
+        if (i > 1) g_log << "\t";
         std::string out = lua["tostring"](o);
-		g_log << out;
+        g_log << out;
     }
-	g_log << std::endl;
+    g_log << std::endl;
 
     return 0;
 }
@@ -99,8 +100,9 @@ void psolua_load_library(lua_State * L) {
     psoTable["read_cstr"] = psolualib_read_cstr;
     psoTable["read_wstr"] = psolualib_read_wstr;
     psoTable["read_mem"] = psolualib_read_mem;
-	psoTable["base_address"] = g_PSOBaseAddress;
-	lua["print"]("PSOBB Base address is ", g_PSOBaseAddress);
+    psoTable["base_address"] = g_PSOBaseAddress;
+    psoTable["list_addon_directories"] = psolualib_list_addons;
+    lua["print"]("PSOBB Base address is ", g_PSOBaseAddress);
 
     // Exception handling
     lua_pushlightuserdata(L, (void*)wrap_exceptions);
@@ -130,15 +132,15 @@ void psolua_initialize_state(void) {
 
     luaL_openlibs(g_LuaState);
     psolua_load_library(g_LuaState);
-	sol::protected_function_result res = lua.do_file("addons/init.lua");
-	if (res.status() != sol::call_status::ok) {
-		sol::error what = res;
-		g_log << (int) res.status() << std::endl;
-		g_log << what.what() << std::endl;
-		lua["pso"]["error_handler"](what);
-		MessageBoxA(nullptr, "Failed to load init.lua", "Lua error", 0);
-		exit(1);
-	}
+    sol::protected_function_result res = lua.do_file("addons/init.lua");
+    if (res.status() != sol::call_status::ok) {
+        sol::error what = res;
+        g_log << (int)res.status() << std::endl;
+        g_log << what.what() << std::endl;
+        lua["pso"]["error_handler"](what);
+        MessageBoxA(nullptr, "Failed to load init.lua", "Lua error", 0);
+        exit(1);
+    }
     psoluah_Init();
 
     psolua_initialize_on_next_frame = false;
@@ -187,4 +189,25 @@ static sol::table psolualib_read_mem(sol::table t, int memory_address, int len) 
         t.add((int)buf[i]);
     }
     return t;
+}
+
+static sol::table psolualib_list_addons() {
+    sol::state_view lua(g_LuaState);
+
+    HANDLE hFind;
+    WIN32_FIND_DATA find;
+
+    sol::table ret = lua.create_table();
+
+    hFind = FindFirstFileA("addons/*", &find);
+    do {
+        std::string filename(find.cFileName);
+        if (filename == "..") continue;
+        if (filename == ".") continue;
+        if (find.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+            ret.add(filename);
+        }
+    } while (FindNextFileA(hFind, &find));
+
+    return ret;
 }
