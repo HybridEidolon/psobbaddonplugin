@@ -11,13 +11,14 @@ local function init()
     name = 'Hello world',
     version = '1.0',
     author = 'Eidolon',
-    present = present
+    present = present,
+    toggleable = true,
   }
 end
 
 return {
   __addon = {
-    init = init
+    init = init,
   },
-  some_publicly_exported_function = some_publicly_exported_function
+  some_publicly_exported_function = some_publicly_exported_function,
 }
