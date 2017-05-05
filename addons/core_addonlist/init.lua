@@ -39,7 +39,7 @@ present = function()
     -- imgui.Text('Toggle'); imgui.NextColumn()
     imgui.Separator()
 
-    for k, v in pairs(psointernal.get_addons()) do
+    for _, v in pairs(psointernal.get_addons()) do
       local do_desc_tooltip = function()
         if (imgui.IsItemHovered() and type(v.meta.description) == 'string') then
           imgui.BeginTooltip()

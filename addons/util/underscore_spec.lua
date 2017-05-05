@@ -129,8 +129,8 @@ describe('underscore', function()
 
   describe('toPairs', function()
     it('should map the table to a list of pairs', function()
-      local e = {{'b', 2}, {'a', 1}}
-      local v = {a = 1, b = 2}
+      local e = {{'b', 2}}
+      local v = {b = 2}
       assert.are.same(
         __.toPairs(v),
         e
@@ -146,6 +146,18 @@ describe('underscore', function()
         __.fromPairs(v),
         e
       )
+    end)
+  end)
+
+  describe('clear', function()
+    it('should clear the same table', function()
+      local t = {1, 2, 3, a = 4}
+      __.clear(t)
+      assert.is.equal(
+        #t,
+        0
+      )
+      assert.is.falsy(t.a)
     end)
   end)
 end)

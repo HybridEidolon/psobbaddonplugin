@@ -11,6 +11,7 @@ local const
 local identity
 local toPairs
 local fromPairs
+local clear
 
 -- Map the elements of a list over a function
 map = function(array, func)
@@ -126,6 +127,13 @@ identity = function(...)
   return ...
 end
 
+-- Clear a table of all its keys
+clear = function(t)
+  for k, _ in pairs(t) do
+    t[k] = nil
+  end
+end
+
 return {
   map = map,
   filter = filter,
@@ -140,4 +148,5 @@ return {
   identity = identity,
   toPairs = toPairs,
   fromPairs = fromPairs,
+  clear = clear,
 }
