@@ -17,7 +17,8 @@ init = function()
     version = "0.3.0",
     description = "An addon main menu with hooks for adding buttons.",
     present = present,
-    key_pressed = key_pressed
+    key_pressed = key_pressed,
+    toggleable = false,
   }
 end
 

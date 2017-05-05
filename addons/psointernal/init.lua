@@ -4,6 +4,8 @@ local present_hooks = {}
 local key_pressed_hooks = {}
 local key_released_hooks = {}
 
+-- Note: this does not check toggleable field of addon metadata.
+-- Use this with care.
 local function set_addon_enabled(path, enabled)
   addons[path].meta.enabled = enabled
   if (present_hooks[path]) then
@@ -51,6 +53,7 @@ local function on_init()
           version = val.version or '?',
           author = val.author or '?',
           description = val.description,
+          toggleable = val.toggleable or false,
           loaded = true,
           enabled = true
         }

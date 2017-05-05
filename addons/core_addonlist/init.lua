@@ -20,7 +20,8 @@ init = function()
     author = "Eidolon",
     version = "0.3.0",
     description = "Shows a list of detected addons to the user.",
-    present = present
+    present = present,
+    toggleable = false,
   }
 end
 
@@ -35,7 +36,7 @@ present = function()
     imgui.Text('Name'); imgui.NextColumn()
     imgui.Text('Version'); imgui.NextColumn()
     imgui.Text('Author'); imgui.NextColumn()
-    -- imgui.Text('Toggle'); imgui.NextColumn()
+    imgui.Text('Toggle'); imgui.NextColumn()
     imgui.Separator()
 
     for _, v in pairs(psointernal.get_addons()) do
@@ -66,13 +67,17 @@ present = function()
       if (not v.meta.loaded) then
         imgui.PopStyleColor()
       end
-      -- local ss
-      -- local do_enabled = v.meta.enabled
-      -- ss, do_enabled = imgui.Selectable('Enable', do_enabled)
-      -- if (do_enabled ~= v.meta.enabled) then
-      --   psointernal.set_addon_enabled(k, do_enabled)
-      -- end
-      -- imgui.NextColumn()
+
+      if (v.meta.toggleable) then
+        local ss
+        local do_enabled = v.meta.enabled
+        ss, do_enabled = imgui.Selectable('Enable', do_enabled)
+        if (do_enabled ~= v.meta.enabled) then
+          psointernal.set_addon_enabled(k, do_enabled)
+        end
+        imgui.NextColumn()
+      end
+
     end
     imgui.End()
   end

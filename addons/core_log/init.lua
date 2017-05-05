@@ -46,7 +46,8 @@ init = function()
     author = "Eidolon",
     version = "0.3.0",
     description = "Wraps print and provides a viewable log.\nNote, can't log anything until after it is loaded.",
-    present = present
+    present = present,
+    toggleable = false,
   }
 end
 
