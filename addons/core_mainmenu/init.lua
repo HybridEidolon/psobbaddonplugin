@@ -48,7 +48,7 @@ add_button = function(name, func)
   hooked_buttons[name] = func
 end
 
-remove_button = function(name, func)
+remove_button = function(name)
   hooked_buttons[name] = nil
 end
 

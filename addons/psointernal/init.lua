@@ -94,7 +94,7 @@ local function on_present()
 end
 
 local function on_key_pressed(key)
-  for _, v in pairs(key_pressed_hooks) do
+  for a, v in pairs(key_pressed_hooks) do
     if (v.enabled) then
       local status, ret = pcall(function() v.fn(key); end)
       if (not status) then
@@ -107,7 +107,7 @@ local function on_key_pressed(key)
 end
 
 local function on_key_released(key)
-  for _, v in pairs(key_released_hooks) do
+  for a, v in pairs(key_released_hooks) do
     if (v.enabled) then
       local status, ret = pcall(function() v.fn(key); end)
       if (not status) then

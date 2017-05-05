@@ -1,5 +1,6 @@
-[*]
 root = true
+
+[*]
 charset = utf-8
 indent_size = 4
 indent_style = space
@@ -14,4 +15,10 @@ indent_style = tab
 indent_size = 2
 
 [*.yml]
+indent_size = 2
+
+[*.json]
+indent_size = 2
+
+[.luacheckrc]
 indent_size = 2

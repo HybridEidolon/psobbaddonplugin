@@ -11,7 +11,6 @@ local log_items = {}
 local add_log_item
 
 local old_print = print
-local add_log_item
 
 local pack_table = function(...)
   return { n = select('#', ...), ... }
@@ -20,7 +19,6 @@ end
 local my_print = function(...)
   local s = ''
   local t = pack_table(...)
-  local i
   for i=1, t.n do
     if (i > 1) then
       s = s .. '\t'
@@ -60,7 +58,7 @@ present = function()
   s, window_open = imgui.Begin('Log', window_open)
 
   imgui.Text('log')
-  for i, v in ipairs(log_items) do
+  for _, v in ipairs(log_items) do
     imgui.TextUnformatted(v)
   end
 
