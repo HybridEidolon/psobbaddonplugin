@@ -6,8 +6,8 @@
 class DebugViewBuffer : public std::stringbuf
 {
 protected:
-	int sync();
+    int sync();
 public:
-	virtual ~DebugViewBuffer();
+    virtual ~DebugViewBuffer();
 
 };

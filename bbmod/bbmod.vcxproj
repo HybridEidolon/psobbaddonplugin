@@ -153,7 +153,6 @@
     <ClCompile Include="src\luastate.cpp" />
     <ClCompile Include="src\lua_hooks.cpp" />
     <ClCompile Include="src\lua_psolib.cpp" />
-    <ClCompile Include="src\ui.cpp" />
     <ClCompile Include="src\util.cpp" />
     <ClCompile Include="src\wrap_imgui_impl.cpp" />
   </ItemGroup>
