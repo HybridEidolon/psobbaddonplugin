@@ -1,4 +1,4 @@
-std = "luajit"
+std = "luajit+busted"
 globals = {
   "pso",
   "pso_on_init",
@@ -9,5 +9,7 @@ globals = {
 }
 include_files = {
   "addons/**/*",
-  "addon_examples/**/*"
+  "addon_examples/**/*",
+  ".luacheckrc",
+  ".busted"
 }

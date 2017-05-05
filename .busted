@@ -1,0 +1,9 @@
+return {
+  _all = {
+    lpath = './addons/?/init.lua;./addons/?.lua',
+    ROOT = {'addons'},
+  },
+  examples = {
+    ROOT = {'addon_examples'},
+  },
+}
