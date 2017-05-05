@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## Unreleased
+## v0.3.0
 
 This release focuses on creating a resilient addon registration
 interface that is compatible with the existing Lua module system. It
@@ -39,6 +39,7 @@ depend on other addons.
   Directories under `addons/` do _not_ have to export this key if they
   are simply regular Lua modules; they will not show up in the addon
   list and not be able to register hooks.
+- Basic unit testing for Underscore utility library.
 
 ### Changed
 
@@ -56,7 +57,7 @@ depend on other addons.
 
 - `on_` functions have all been removed from the `pso` global table.
 
-## 0.2.1
+## v0.2.1
 
 No changes have been made to the plugin itself, this is just a release
 test for AppVeyor.
@@ -65,12 +66,12 @@ test for AppVeyor.
 
 - AppVeyor continuous integration builds.
 
-## 0.2.0
+## v0.2.0
 
 This update "breaks" compatibility with 0.1.0 by ensuring read_mem
 yields numbers of the range 0 to 255 rather than -127 to 127. This was
 the intended behavior.
 
-## 0.1.0
+## v0.1.0
 
 Minimum viable product.
