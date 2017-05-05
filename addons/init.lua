@@ -24,3 +24,10 @@ function pso_on_key_released(key)
   psointernal.on_key_released(key)
 end
 
+function pso_on_log(text)
+  psointernal.on_log(text)
+end
+
+function pso_on_unhandled_error(msg)
+  psointernal.on_unhandled_error(msg)
+end

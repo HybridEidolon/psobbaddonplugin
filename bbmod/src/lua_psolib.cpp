@@ -44,6 +44,7 @@ std::string psolualib_error_handler(std::string msg) {
         g_log << "uncaught error: " << msg << std::endl;
         std::string traceback = lua["debug"]["traceback"]();
         g_log << traceback << std::endl;
+        psoluah_UnhandledError(msg);
     }
     catch (...) {
         // do nothing
@@ -54,14 +55,17 @@ std::string psolualib_error_handler(std::string msg) {
 static int psolua_print(lua_State *L) {
     sol::state_view lua(L);
     int nargs = lua_gettop(L);
+    std::string coalesce;
 
     for (int i = 1; i <= nargs; i++) {
         sol::object o = sol::stack::get<sol::object>(lua, i);
         if (i > 1) g_log << "\t";
+        if (i > 1) coalesce += "\t";
         std::string out = lua["tostring"](o);
-        g_log << out;
+        coalesce += out;
     }
-    g_log << std::endl;
+    g_log << coalesce << std::endl;
+    psoluah_Log(coalesce);
 
     return 0;
 }
@@ -102,6 +106,7 @@ void psolua_load_library(lua_State * L) {
     psoTable["read_mem"] = psolualib_read_mem;
     psoTable["base_address"] = g_PSOBaseAddress;
     psoTable["list_addon_directories"] = psolualib_list_addons;
+    psoTable["log_items"] = lua.create_table();
     lua["print"]("PSOBB Base address is ", g_PSOBaseAddress);
 
     // Exception handling

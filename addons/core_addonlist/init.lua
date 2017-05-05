@@ -31,7 +31,7 @@ present = function()
     imgui.SetNextWindowSize(300, 200, 'FirstUseEver')
     status, window_open = imgui.Begin('Addons', window_open)
 
-    imgui.Columns(3)
+    imgui.Columns(4)
     imgui.Separator()
     imgui.Text('Name'); imgui.NextColumn()
     imgui.Text('Version'); imgui.NextColumn()
@@ -75,6 +75,8 @@ present = function()
         if (do_enabled ~= v.meta.enabled) then
           psointernal.set_addon_enabled(k, do_enabled)
         end
+        imgui.NextColumn()
+      else
         imgui.NextColumn()
       end
 

@@ -5,6 +5,8 @@ globals = {
   "pso_on_key_pressed",
   "pso_on_key_released",
   "pso_on_present",
+  "pso_on_log",
+  "pso_on_unhandled_error",
   "imgui"
 }
 include_files = {

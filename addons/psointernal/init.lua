@@ -4,6 +4,8 @@ local present_hooks = {}
 local key_pressed_hooks = {}
 local key_released_hooks = {}
 
+local log_items = {}
+
 -- Note: this does not check toggleable field of addon metadata.
 -- Use this with care.
 local function set_addon_enabled(path, enabled)
@@ -73,6 +75,7 @@ local function on_init()
           name = addon.path,
           version = 'error',
           author = 'see log',
+          toggleable = false,
           loaded = false,
           enabled = false
         }
@@ -122,6 +125,16 @@ local function on_key_released(key)
   end
 end
 
+local function on_log(text)
+  -- Addons aren't allowed to hook log.
+  -- However, they can observe log_items.
+  log_items[#log_items+1] = {'PRINT', text}
+end
+
+local function on_unhandled_error(msg)
+  log_items[#log_items+1] = {'FATAL', 'unhandled error: ' .. msg .. '\n' .. debug.traceback()}
+end
+
 local function get_addons()
   return addons
 end
@@ -132,6 +145,9 @@ return {
   on_present = on_present,
   on_key_pressed = on_key_pressed,
   on_key_released = on_key_released,
+  on_log = on_log,
+  on_unhandled_error = on_unhandled_error,
   get_addons = get_addons,
-  set_addon_enabled = set_addon_enabled
+  set_addon_enabled = set_addon_enabled,
+  log_items = log_items,
 }

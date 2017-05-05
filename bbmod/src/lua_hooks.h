@@ -10,3 +10,7 @@ void psoluah_Init(void);
 void psoluah_KeyPressed(int key_code);
 
 void psoluah_KeyReleased(int key_code);
+
+void psoluah_Log(std::string text);
+
+void psoluah_UnhandledError(std::string msg);
