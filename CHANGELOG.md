@@ -21,10 +21,11 @@ depend on other addons.
 - `pso.list_addon_directories` returns a list of the directories in
   `addons/` as an array table. It is used in `psointernal` for loading
   addons.
-- `pso_on_init`, `pso_on_present`, `pso_on_key_pressed`, and
-  `pso_on_key_released` are all new low-level global functions that can
-  be set to define the `addons/` behavior entirely. **You don't need
-  this unless you want to completely change the plugin's behavior.**
+- `pso_on_init`, `pso_on_present`, `pso_on_key_pressed`,
+  `pso_on_key_released`, `pso_on_log`, and `pso_on_unhandled_error`
+  are all new low-level global functions that can be set to define the
+  `addons/` behavior entirely. **You don't need this unless you want
+  to completely change the plugin's behavior.**
 - `util.underscore` package adds several utility functions,
   particularly for functional programming. You can use it like any other
   Lua module:
@@ -49,6 +50,7 @@ depend on other addons.
   updated to the new API.** After this release, the addon registration
   interface will be mostly stabilized and future releases will not
   break old addons (hopefully).
+- Core UI has been rewritten in pure Lua.
 
 ### Removed
 
