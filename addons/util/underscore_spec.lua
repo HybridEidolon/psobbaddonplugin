@@ -114,4 +114,38 @@ describe('underscore', function()
       )
     end)
   end)
+
+  describe('forEach', function()
+    it('should run the function for each item', function()
+      local t = {}
+      local f = function() t[#t+1] = 1; end
+      __.forEach({1, 2, 3}, f)
+      assert.are.same(
+        t,
+        {1, 1, 1}
+      )
+    end)
+  end)
+
+  describe('toPairs', function()
+    it('should map the table to a list of pairs', function()
+      local e = {{'b', 2}, {'a', 1}}
+      local v = {a = 1, b = 2}
+      assert.are.same(
+        __.toPairs(v),
+        e
+      )
+    end)
+  end)
+
+  describe('fromPairs', function()
+    it('should map the list of pairs to a table', function()
+      local v = {{'a', 1}, {'b', 2}}
+      local e = {a = 1, b = 2}
+      assert.are.same(
+        __.fromPairs(v),
+        e
+      )
+    end)
+  end)
 end)

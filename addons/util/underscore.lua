@@ -1,6 +1,7 @@
 local map
 local filter
 local foldl
+local forEach
 local concat
 local head
 local tail
@@ -8,6 +9,8 @@ local compose
 local negate
 local const
 local identity
+local toPairs
+local fromPairs
 
 -- Map the elements of a list over a function
 map = function(array, func)
@@ -44,6 +47,28 @@ foldl = function(array, reducer, initial)
     end
   end
 
+  return ret
+end
+
+forEach = function(array, func)
+  for _, v in ipairs(array) do
+    func(v)
+  end
+end
+
+toPairs = function(t)
+  local ret = {}
+  for k, v in pairs(t) do
+    ret[#ret+1] = {k, v}
+  end
+  return ret
+end
+
+fromPairs = function(a)
+  local ret = {}
+  for _, v in ipairs(a) do
+    ret[v[1]] = v[2]
+  end
   return ret
 end
 
@@ -105,6 +130,7 @@ return {
   map = map,
   filter = filter,
   foldl = foldl,
+  forEach = forEach,
   concat = concat,
   head = head,
   tail = tail,
@@ -112,4 +138,6 @@ return {
   negate = negate,
   const = const,
   identity = identity,
+  toPairs = toPairs,
+  fromPairs = fromPairs,
 }
