@@ -31,12 +31,12 @@ present = function()
     imgui.SetNextWindowSize(300, 200, 'FirstUseEver')
     status, window_open = imgui.Begin('Addons', window_open)
 
-    imgui.Columns(4)
+    imgui.Columns(3)
     imgui.Separator()
     imgui.Text('Name'); imgui.NextColumn()
     imgui.Text('Version'); imgui.NextColumn()
     imgui.Text('Author'); imgui.NextColumn()
-    imgui.Text('Toggle'); imgui.NextColumn()
+    -- imgui.Text('Toggle'); imgui.NextColumn()
     imgui.Separator()
 
     for k, v in pairs(psointernal.get_addons()) do
@@ -68,17 +68,17 @@ present = function()
         imgui.PopStyleColor()
       end
 
-      if (v.meta.toggleable) then
-        local ss
-        local do_enabled = v.meta.enabled
-        ss, do_enabled = imgui.Selectable('Enable', do_enabled)
-        if (do_enabled ~= v.meta.enabled) then
-          psointernal.set_addon_enabled(k, do_enabled)
-        end
-        imgui.NextColumn()
-      else
-        imgui.NextColumn()
-      end
+      -- if (v.meta.toggleable) then
+      --   local ss
+      --   local do_enabled = v.meta.enabled
+      --   ss, do_enabled = imgui.Selectable('Enable', do_enabled)
+      --   if (do_enabled ~= v.meta.enabled) then
+      --     psointernal.set_addon_enabled(k, do_enabled)
+      --   end
+      --   imgui.NextColumn()
+      -- else
+      --   imgui.NextColumn()
+      -- end
 
     end
     imgui.End()
