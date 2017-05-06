@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.3.1
+
+A minor release to clean up clutter in PSOBB installations.
+
+### Changed
+
+- The location of imgui.ini and imgui_log.txt have moved to the addons
+  directory.
+
 ## v0.3.0
 
 This release focuses on creating a resilient addon registration

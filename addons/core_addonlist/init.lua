@@ -18,7 +18,7 @@ init = function()
   return {
     name = "Core - Addon List",
     author = "Eidolon",
-    version = "0.3.0",
+    version = "0.3.1",
     description = "Shows a list of detected addons to the user.",
     present = present,
     toggleable = false,
