@@ -16,7 +16,7 @@ init = function()
   return {
     name = "Core - Main Menu",
     author = "Eidolon",
-    version = "0.3.1",
+    version = "0.3.2",
     description = "An addon main menu with hooks for adding buttons.",
     present = present,
     key_pressed = key_pressed,

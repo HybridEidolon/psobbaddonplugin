@@ -70,6 +70,16 @@ static int psolua_print(lua_State *L) {
     return 0;
 }
 
+static void psolualib_set_sleep_hack_enabled(bool enabled) {
+    uint8_t* location = (uint8_t*)(0x0042C47E + g_PSOBaseAddress);
+    if (enabled) {
+        location[1] = 0x01;
+    }
+    else {
+        location[1] = 0x00;
+    }
+}
+
 template <typename T> std::function<T(int)> read_t(void) {
     auto pid = GetCurrentProcess();
     return [=](int addr) {
@@ -104,6 +114,7 @@ void psolua_load_library(lua_State * L) {
     psoTable["read_cstr"] = psolualib_read_cstr;
     psoTable["read_wstr"] = psolualib_read_wstr;
     psoTable["read_mem"] = psolualib_read_mem;
+    psoTable["set_sleep_hack_enabled"] = psolualib_set_sleep_hack_enabled;
     psoTable["base_address"] = g_PSOBaseAddress;
     psoTable["list_addon_directories"] = psolualib_list_addons;
     psoTable["log_items"] = lua.create_table();

@@ -19,7 +19,7 @@ init = function()
   return {
     name = "Core - Log",
     author = "Eidolon",
-    version = "0.3.1",
+    version = "0.3.2",
     description = "Provides a log window for all log items to the pso_on_log callback.",
     present = present,
     toggleable = false,

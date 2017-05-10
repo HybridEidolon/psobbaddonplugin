@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.3.2
+
+### Added
+
+- `pso.set_sleep_hack_enabled(enabled)`: `true` to patch the frame
+  limiter to use `Sleep(1)` and reduce CPU usage dramatically. _This
+  tweak will cause Ephinea to instantly close the game. Sorry! It's
+  out of our control._ The game normally calls `Sleep(0)` to yield to
+  other threads, but Windows does not guarantee that the process
+  gives up its timeslice. Using 1 millisecond is enough to get the
+  desired effect without skewing timing. Since this doesn't work on
+  Ephinea, there is no built-in UI to enable it.
+
 ## v0.3.1
 
 A minor release to clean up clutter in PSOBB installations.
