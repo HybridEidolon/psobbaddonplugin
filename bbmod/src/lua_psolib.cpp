@@ -13,6 +13,7 @@ static int psolua_print(lua_State *L);
 static std::string psolualib_read_cstr(int memory_address, int len = 2048);
 static std::string psolualib_read_wstr(int memory_address, int len = 1024);
 static sol::table psolualib_read_mem(sol::table t, int memory_address, int len);
+static std::string psolualib_read_mem_str(int memory_address, int len = 2048);
 static sol::table psolualib_list_addons();
 
 bool psolua_initialize_on_next_frame = false;
@@ -114,6 +115,7 @@ void psolua_load_library(lua_State * L) {
     psoTable["read_cstr"] = psolualib_read_cstr;
     psoTable["read_wstr"] = psolualib_read_wstr;
     psoTable["read_mem"] = psolualib_read_mem;
+    psoTable["read_mem_str"] = psolualib_read_mem_str;
     psoTable["set_sleep_hack_enabled"] = psolualib_set_sleep_hack_enabled;
     psoTable["base_address"] = g_PSOBaseAddress;
     psoTable["list_addon_directories"] = psolualib_list_addons;
@@ -205,6 +207,17 @@ static sol::table psolualib_read_mem(sol::table t, int memory_address, int len) 
         t.add((int)buf[i]);
     }
     return t;
+}
+
+static std::string psolualib_read_mem_str(int memory_address, int len) {
+    char buf[8192];
+    memset(buf, 0, len);
+    SIZE_T read;
+    auto pid = GetCurrentProcess();
+    if (!ReadProcessMemory(pid, (LPCVOID)memory_address, buf, len, &read)) {
+        throw "ReadProcessMemory error";
+    }
+    return std::string(buf, len);
 }
 
 static sol::table psolualib_list_addons() {
