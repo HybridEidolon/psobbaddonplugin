@@ -51,5 +51,6 @@ PSO specific functions are in the `pso` global table.
  * read_cstr(addr, len) -- read c_str at address with len bytes, or null terminated (0 len)
  * read_wstr(addr, len) -- read utf16 str to utf8 at address with len characters, or double null terminated (0 len)
  * read_mem(table, addr, len) -- read len bytes from addr into table. the table should be initialized as empty, i.e. `local table = {}; pso.read_mem(table, 0x00400000, 0x7fffffff-0x00400000)` (don't read the entire address space, that's silly and will probably kill the process)
+ * read_mem_str(addr, len) -- read len bytes from addr into a string (not null terminated). lua treats binary files the same way it does text files so this can be used to efficiently write sections of memory directly to a file.
  * reload() -- at the end of present, re-initialize the lua state. all addons and modules will be reloaded, no state will be preserved.
  * base_address -- the base address of the PSOBB process
