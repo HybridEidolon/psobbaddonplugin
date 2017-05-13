@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.3.3
+
+### Added
+
+- `pso.read_mem_str(addr, len)` - Read a block of memory into a Lua
+  string. This is likely to be more performant, but you will have to
+  use `string.byte` on the characters yourself and bit ops to
+  compose larger integers, floats, etc.
+
 ## v0.3.2
 
 ### Added
