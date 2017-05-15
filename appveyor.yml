@@ -16,7 +16,19 @@ configuration:
   - Debug
   - Release
 
-after_build:
+before_build:
+  - set PATH=C:\Python27\Scripts;%PATH%
+  - pip install hererocks
+  - hererocks env --luajit 2.0 -rlatest
+  - call env\bin\activate
+  - luarocks install busted
+  - luarocks install luacheck
+
+test_script:
+  - cmd /c "luacheck addons addon_examples || exit 0"
+  - busted
+
+after_test:
   - ps: ci/after_build.ps1
 
 deploy:
