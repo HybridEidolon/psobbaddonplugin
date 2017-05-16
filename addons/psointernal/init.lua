@@ -34,19 +34,23 @@ local function on_init()
 
   -- require each module
   for _, v in ipairs(dirs) do
-    local status, module = pcall(function() return require(v); end)
+    local status, module = xpcall(function() return require(v); end, debug.traceback)
     if (status and module.__addon ~= nil and type(module.__addon.init) == 'function') then
       loaded_addons[v] = {
         path = v,
         module = module
       }
     end
+    if (not status) then
+      print("Failed to load module from directory " .. v)
+      pso.error_handler(module)
+    end
   end
 
   -- call init for each addon
   for _, addon in pairs(loaded_addons) do
     if (addon.module.__addon ~= nil and type(addon.module.__addon.init) == 'function') then
-      local success, val = pcall(addon.module.__addon.init)
+      local success, val = xpcall(addon.module.__addon.init, debug.traceback)
 
       if (success) then
         addon.meta = {
@@ -70,6 +74,8 @@ local function on_init()
           key_released_hooks[addon.path] = make_hook(val.key_released)
         end
       else
+        pso.error_handler(val)
+
         addon.meta = {
           path = addon.path,
           name = addon.path,
@@ -89,7 +95,7 @@ end
 local function on_present()
   for a, v in pairs(present_hooks) do
     if (v.enabled) then
-      local status, ret = pcall(v.fn)
+      local status, ret = xpcall(v.fn, debug.traceback)
       if (not status) then
         print('Addon ' .. a .. ' present handler errored; disabling addon')
         pso.error_handler(ret)
@@ -102,7 +108,7 @@ end
 local function on_key_pressed(key)
   for a, v in pairs(key_pressed_hooks) do
     if (v.enabled) then
-      local status, ret = pcall(function() v.fn(key); end)
+      local status, ret = xpcall(function() v.fn(key); end, debug.traceback)
       if (not status) then
         print('Addon ' .. a .. ' key_pressed handler errored; disabling addon')
         pso.error_handler(ret)
@@ -115,7 +121,7 @@ end
 local function on_key_released(key)
   for a, v in pairs(key_released_hooks) do
     if (v.enabled) then
-      local status, ret = pcall(function() v.fn(key); end)
+      local status, ret = xpcall(function() v.fn(key); end, debug.traceback)
       if (not status) then
         print('Addon ' .. a .. ' key_released handler errored; disabling addon')
         pso.error_handler(ret)
@@ -132,7 +138,7 @@ local function on_log(text)
 end
 
 local function on_unhandled_error(msg)
-  log_items[#log_items+1] = {'FATAL', 'unhandled error: ' .. msg .. '\n' .. debug.traceback()}
+  log_items[#log_items+1] = {'FATAL', 'unhandled error: ' .. msg}
 end
 
 local function get_addons()
