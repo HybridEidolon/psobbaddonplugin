@@ -185,7 +185,7 @@ static std::string psolualib_read_wstr(int memory_address, int len) {
     if (!ReadProcessMemory(pid, (LPCVOID)memory_address, buf, len * 2, &read)) {
         throw "ReadProcessMemory error";
     }
-    if (!WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, (LPCWCH)buf, len, buf2, 8192, nullptr, nullptr)) {
+    if (!WideCharToMultiByte(CP_UTF8, 0, (LPCWCH)buf, len, buf2, 8192, nullptr, nullptr)) {
         throw "invalid utf-16 string";
     }
     return buf2;
