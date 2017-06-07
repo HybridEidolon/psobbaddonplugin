@@ -1,4 +1,4 @@
-#include "lua_psolib.h"
+﻿#include "lua_psolib.h"
 
 #include <Windows.h>
 #include "sol.hpp"
@@ -91,6 +91,22 @@ template <typename T> std::function<T(int)> read_t(void) {
         }
         return *(T*)buf;
     };
+}
+
+void psolua_store_fpu_state(struct FPUSTATE& fpustate) {
+    char* state = fpustate.state;
+    __asm {
+        mov ebx, state
+        fsave [ebx]
+    }
+}
+
+void psolua_restore_fpu_state(struct FPUSTATE& fpustate) {
+    char* state = fpustate.state;
+    __asm {
+        mov ebx, state
+        frstor [ebx]
+    }
 }
 
 void psolua_load_library(lua_State * L) {

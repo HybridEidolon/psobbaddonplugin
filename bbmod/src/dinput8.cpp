@@ -1,4 +1,4 @@
-#include <iostream>
+﻿#include <iostream>
 #include <fstream>
 #include <string>
 
@@ -52,7 +52,10 @@ void __fastcall PSOBB_InitD3D(void* self, void* notused) {
     if (oPSOBB_InitD3D != nullptr) {
         oPSOBB_InitD3D(self);
         // bad d3d. evil. do not.
-        __asm finit;
+        // too bad, we have to deal with this every time we invoke Lua code
+        // because otherwise Recons will occasionally just _break_
+        // #SEGAProgramming
+        //__asm finit;
     }
 
     ImGui_ImplD3D8_Init(*PSOBB_HWND_PTR, PSOBB_DIRECT3DDEVICE8_PTR);
@@ -93,14 +96,19 @@ void Initialize() {
         oDirect3DCreate8 = (tDirect3DCreate8)GetProcAddress(hMod, "Direct3DCreate8");
     }
 
+    FPUSTATE fpustate;
+    psolua_store_fpu_state(fpustate);
     psolua_initialize_state();
+    psolua_restore_fpu_state(fpustate);
 }
 
 void Uninitialize() {
     MH_Uninitialize();
+    FPUSTATE fpustate;
+    psolua_store_fpu_state(fpustate);
     lua_close(g_LuaState);
+    psolua_restore_fpu_state(fpustate);
     g_LuaState = nullptr;
-    //PHYSFS_deinit();
 }
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {

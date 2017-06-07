@@ -1,4 +1,4 @@
-#include "luastate.h"
+﻿#include "luastate.h"
 
 #include <vector>
 
@@ -9,6 +9,7 @@
 #include "wrap_imgui_impl.h"
 #include "sol.hpp"
 #include "lua_hooks.h"
+#include "lua_psolib.h"
 
 struct lua_State* g_LuaState = nullptr;
 
@@ -34,13 +35,18 @@ void psolua_push_key_released(int key_code) {
 
 void psolua_process_key_events(void) {
     int evts = key_events.size();
+    FPUSTATE fpustate;
 
     for (auto e : key_events) {
         if (e.isPressed) {
+            psolua_store_fpu_state(fpustate);
             psoluah_KeyPressed(e.keyCode);
+            psolua_restore_fpu_state(fpustate);
         }
         else {
+            psolua_store_fpu_state(fpustate);
             psoluah_KeyReleased(e.keyCode);
+            psolua_restore_fpu_state(fpustate);
         }
     }
 

@@ -1,4 +1,4 @@
-#include "imgui_d3d8_dev.h"
+﻿#include "imgui_d3d8_dev.h"
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_internal.h"
@@ -85,11 +85,17 @@ STDMETHODIMP ImguiD3D8Device::Reset(D3DPRESENT_PARAMETERS * pPresentationParamet
 
 STDMETHODIMP ImguiD3D8Device::Present(CONST RECT * pSourceRect, CONST RECT * pDestRect, HWND hDestWindowOverride, CONST RGNDATA * pDirtyRegion)
 {
+    FPUSTATE fpustate;
+    psolua_store_fpu_state(fpustate);
+
     psolua_process_key_events();
+
     psoluah_Present();
 
+    psolua_restore_fpu_state(fpustate);
     if (device->BeginScene() >= 0) {
         // Prevent imgui from asserting.
+
         while (GImGui->CurrentWindowStack.Size > 1) {
             g_log << "[assert avoided] Match your imgui.Begin's with imgui.End's!" << std::endl;
             ImGui::End();
@@ -98,11 +104,15 @@ STDMETHODIMP ImguiD3D8Device::Present(CONST RECT * pSourceRect, CONST RECT * pDe
         ImGui::Render();
 
         device->EndScene();
+
     }
+
     auto ret = device->Present(pSourceRect, pDestRect, hDestWindowOverride, pDirtyRegion);
     ImGui_ImplD3D8_NewFrame();
     if (psolua_initialize_on_next_frame) {
+        psolua_store_fpu_state(fpustate);
         psolua_initialize_state();
+        psolua_restore_fpu_state(fpustate);
     }
     return ret;
 }
