@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.3.4
+
+### Fixed
+
+- Fixed a crash where systems running Windows XP may be unable to
+  parse wide strings from memory. (@StephenCWillis)
+- Fixed an issue where the stack trace emitted from the Lua error
+  handler would emit the stack from the error handler's context
+  rather than the context of the traced call. (@StephenCWillis)
+- Save and restore the FPU state when entering Lua code rather than
+  initializing the FPU at launch. This fixes a bug where Recons would
+  occasionally fail to leave their spawning state and be stuck
+  untargetable in mid-air, and possibly other subtle arithmetic bugs.
+
 ## v0.3.3
 
 ### Added
