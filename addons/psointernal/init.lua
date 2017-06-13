@@ -6,6 +6,8 @@ local key_released_hooks = {}
 
 local log_items = {}
 
+local balance_all_stacks
+
 -- Note: this does not check toggleable field of addon metadata.
 -- Use this with care.
 local function set_addon_enabled(path, enabled)
@@ -28,9 +30,100 @@ local function make_hook(fn)
   }
 end
 
+local function override_stack_functions()
+  local push_pop_functions = {
+    { push = "Begin",                     pop = "End" },
+    { push = "Begin_2",                   pop = "End" },
+    { push = "BeginChild",                pop = "EndChild" },
+    { push = "BeginChild_2",              pop = "EndChild" },
+    { push = "BeginChildFrame",           pop = "EndChildFrame" },
+    { push = "BeginGroup",                pop = "EndGroup" },
+    { push = "BeginMainMenuBar",          pop = "EndMainMenuBar" },
+    { push = "BeginMenu",                 pop = "EndMenu" },
+    { push = "BeginMenuBar",              pop = "EndMenuBar" },
+    { push = "BeginPopup",                pop = "EndPopup" },
+    { push = "BeginPopupContextMenuItem", pop = "EndPopup" },
+    { push = "BeginPopupContextVoid",     pop = "EndPopup" },
+    { push = "BeginPopupContextWindow",   pop = "EndPopup" },
+    { push = "BeginPopupModal",           pop = "EndPopup" },
+    { push = "BeginTooltip",              pop = "EndTooltip" },
+    { push = "PushAllowKeyboardFocus",    pop = "PopAllowKeyboardFocus" },
+    { push = "PushClipRect",              pop = "PopClipRect" },
+    { push = "PushID",                    pop = "PopID" },
+    { push = "PushID_2",                  pop = "PopID" },
+    { push = "PushID_4",                  pop = "PopID" },
+    { push = "PushStyleColor",            pop = "PopStyleColor" },
+    { push = "PushStyleVar",              pop = "PopStyleVar" },
+    { push = "PushStyleVar_2",            pop = "PopStyleVar" },
+    { push = "TreePush",                  pop = "TreePop" },
+    { push = "TreePush_2",                pop = "TreePop" },
+    { push = "TreeNode",                  pop = "TreePop" },
+    { push = "TreeNode_2",                pop = "TreePop" },
+    { push = "TreeNodeEx",                pop = "TreePop" },
+    { push = "TreeNodeEx_2",              pop = "TreePop" }
+  }
+
+  local pop_stack = {}
+
+  local override_push_function = function(push, pop)
+    local push_function = imgui[push]
+    local pop_function = imgui[pop]
+
+    local override = function(...)
+      table.insert(pop_stack, pop_function)
+      return push_function(...)
+    end
+
+    imgui[push] = override
+  end
+
+  local override_pop_function = function(pop)
+    local pop_function = imgui[pop]
+
+    local override = function(count)
+      local _count = count or 1
+      for i=1,_count do
+        table.remove(pop_stack)
+      end
+
+      return pop_function(count)
+    end
+
+    imgui[pop] = override
+  end
+
+  for i,push_pop_function in ipairs(push_pop_functions) do
+    local push = push_pop_function.push
+    local pop = push_pop_function.pop
+    override_push_function(push, pop)
+  end
+
+  local hash = {}
+  for i,push_pop_function in ipairs(push_pop_functions) do
+    local pop = push_pop_function.pop
+    if not hash[pop] then
+      override_pop_function(pop)
+      hash[pop] = true
+    end
+  end
+
+  return function()
+    local pop_function = table.remove(pop_stack)
+    while pop_function ~= nil do
+      pop_function()
+      pop_function = table.remove(pop_stack)
+    end
+  end
+end
+
 local function on_init()
   local dirs = pso.list_addon_directories()
   local loaded_addons = {}
+
+  -- override functions to enable automatic balancing
+  -- of imgui stacks to correct for addons that crash
+  -- or those that do not properly balance their stacks
+  balance_all_stacks = override_stack_functions()
 
   -- require each module
   for _, v in ipairs(dirs) do
@@ -101,6 +194,7 @@ local function on_present()
         pso.error_handler(ret)
         set_addon_enabled(a, false)
       end
+      balance_all_stacks()
     end
   end
 end
