@@ -48,30 +48,46 @@ local function override_stack_functions()
     { push = "BeginPopupModal",           pop = "EndPopup" },
     { push = "BeginTooltip",              pop = "EndTooltip" },
     { push = "PushAllowKeyboardFocus",    pop = "PopAllowKeyboardFocus" },
+    { push = "PushButtonRepeat",          pop = "PopButtonRepeat" },
     { push = "PushClipRect",              pop = "PopClipRect" },
     { push = "PushID",                    pop = "PopID" },
     { push = "PushID_2",                  pop = "PopID" },
     { push = "PushID_4",                  pop = "PopID" },
+    { push = "PushItemWidth",             pop = "PopItemWidth" },
     { push = "PushStyleColor",            pop = "PopStyleColor" },
     { push = "PushStyleVar",              pop = "PopStyleVar" },
     { push = "PushStyleVar_2",            pop = "PopStyleVar" },
+    { push = "PushTextWrapPos",           pop = "PopTextWrapPos" },
     { push = "TreePush",                  pop = "TreePop" },
     { push = "TreePush_2",                pop = "TreePop" },
-    { push = "TreeNode",                  pop = "TreePop" },
-    { push = "TreeNode_2",                pop = "TreePop" },
-    { push = "TreeNodeEx",                pop = "TreePop" },
-    { push = "TreeNodeEx_2",              pop = "TreePop" }
+    { push = "TreeNode",                  pop = "TreePop", cond = true },
+    { push = "TreeNode_2",                pop = "TreePop", cond = true },
+    { push = "TreeNodeEx",                pop = "TreePop", cond = true },
+    { push = "TreeNodeEx_2",              pop = "TreePop", cond = true }
   }
 
   local pop_stack = {}
 
-  local override_push_function = function(push, pop)
+  local override_push_function = function(push, pop, cond)
     local push_function = imgui[push]
     local pop_function = imgui[pop]
 
-    local override = function(...)
-      table.insert(pop_stack, pop_function)
-      return push_function(...)
+    local override
+
+    if not cond then
+      override = function(...)
+        table.insert(pop_stack, pop_function)
+        return push_function(...)
+      end
+    else
+      override = function(...)
+        if push_function(...) then
+          table.insert(pop_stack, pop_function)
+          return true
+        end
+
+        return false
+      end
     end
 
     imgui[push] = override
@@ -80,13 +96,23 @@ local function override_stack_functions()
   local override_pop_function = function(pop)
     local pop_function = imgui[pop]
 
-    local override = function(count)
+    local override = function(count, ...)
       local _count = count or 1
-      for i=1,_count do
-        table.remove(pop_stack)
-      end
 
-      return pop_function(count)
+      for i=1,_count do
+        local pop_stack_function = table.remove(pop_stack)
+
+        while pop_stack_function ~= nil and pop_stack_function ~= pop_function do
+          pop_stack_function()
+          pop_stack_function = table.remove(pop_stack)
+        end
+
+        if pop_stack_function ~= nil then
+          pop_stack_function()
+        else
+          error(string.format("Push/Pop mismatch (imgui.%s())", pop))
+        end
+      end
     end
 
     imgui[pop] = override
@@ -95,7 +121,8 @@ local function override_stack_functions()
   for i,push_pop_function in ipairs(push_pop_functions) do
     local push = push_pop_function.push
     local pop = push_pop_function.pop
-    override_push_function(push, pop)
+    local cond = push_pop_function.cond or false
+    override_push_function(push, pop, cond)
   end
 
   local hash = {}
@@ -238,7 +265,6 @@ end
 local function get_addons()
   return addons
 end
-
 
 return {
   on_init = on_init,
