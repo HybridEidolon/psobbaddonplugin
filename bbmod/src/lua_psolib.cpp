@@ -323,7 +323,6 @@ void loadCustomTheme()
         ImGuiStyle& style = ImGui::GetStyle();
 
         style.Alpha = default_style.Alpha;
-        style.FrameRounding = default_style.FrameRounding;
         for (i = 0; i < ImGuiCol_COUNT; i++)
         {
             style.Colors[i] = default_style.Colors[i];
