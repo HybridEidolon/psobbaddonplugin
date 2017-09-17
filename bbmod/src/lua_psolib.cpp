@@ -358,13 +358,6 @@ void loadCustomTheme()
             style.Alpha = wcstof(lpReturnedString, NULL);
         }
 
-        swprintf_s(lpKeyName, _countof(lpKeyName), L"FrameRounding");
-        ret = GetPrivateProfileStringW(lpAppName, lpKeyName, lpDefault, lpReturnedString, _countof(lpReturnedString), lpFileName);
-        if (ret != 0)
-        {
-            style.FrameRounding = wcstof(lpReturnedString, NULL);
-        }
-
         for (i = 0; i < ImGuiCol_COUNT; i++)
         {
             swprintf_s(lpKeyName, _countof(lpKeyName), themeElements[i]);
