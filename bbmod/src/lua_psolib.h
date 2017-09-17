@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include <Windows.h>
 #include <string>
@@ -19,3 +19,5 @@ struct FPUSTATE {
 
 void psolua_store_fpu_state(struct FPUSTATE& fpustate);
 void psolua_restore_fpu_state(struct FPUSTATE& fpustate);
+
+void loadCustomTheme();

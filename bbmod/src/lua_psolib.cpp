@@ -1,4 +1,4 @@
-﻿#include "lua_psolib.h"
+#include "lua_psolib.h"
 
 #include <Windows.h>
 #include "sol.hpp"
@@ -178,6 +178,8 @@ void psolua_initialize_state(void) {
     psoluah_Init();
 
     psolua_initialize_on_next_frame = false;
+
+    loadCustomTheme();
 }
 
 static std::string psolualib_read_cstr(int memory_address, int len) {
@@ -255,4 +257,127 @@ static sol::table psolualib_list_addons() {
     } while (FindNextFileA(hFind, &find));
 
     return ret;
+}
+
+wchar_t *themeElements[ImGuiCol_COUNT]
+{
+    L"Text",
+    L"TextDisabled",
+    L"WindowBg",
+    L"ChildWindowBg",
+    L"PopupBg",
+    L"Border",
+    L"BorderShadow",
+    L"FrameBg",
+    L"FrameBgHovered",
+    L"FrameBgActive",
+    L"TitleBg",
+    L"TitleBgCollapsed",
+    L"TitleBgActive",
+    L"MenuBarBg",
+    L"ScrollbarBg",
+    L"ScrollbarGrab",
+    L"ScrollbarGrabHovered",
+    L"ScrollbarGrabActive",
+    L"ComboBg",
+    L"CheckMark",
+    L"SliderGrab",
+    L"SliderGrabActive",
+    L"Button",
+    L"ButtonHovered",
+    L"ButtonActive",
+    L"Header",
+    L"HeaderHovered",
+    L"HeaderActive",
+    L"Column",
+    L"ColumnHovered",
+    L"ColumnActive",
+    L"ResizeGrip",
+    L"ResizeGripHovered",
+    L"ResizeGripActive",
+    L"CloseButton",
+    L"CloseButtonHovered",
+    L"CloseButtonActive",
+    L"PlotLines",
+    L"PlotLinesHovered",
+    L"PlotHistogram",
+    L"PlotHistogramHovered",
+    L"TextSelectedBg",
+    L"ModalWindowDarkening",
+};
+
+void loadCustomTheme()
+{
+    int ret;
+    int i;
+    float s = 1.0f / 255.0f;
+    FILE *fp;
+
+    wchar_t *themeFile = L"addons\\theme.ini";
+
+    _wfopen_s(&fp, themeFile, L"r");
+    if (fp == NULL)
+    {
+        const ImGuiStyle default_style;
+
+        ImGuiStyle& style = ImGui::GetStyle();
+
+        style.Alpha = default_style.Alpha;
+        style.FrameRounding = default_style.FrameRounding;
+        for (i = 0; i < ImGuiCol_COUNT; i++)
+        {
+            style.Colors[i] = default_style.Colors[i];
+        }
+    }
+    else
+    {
+        // GetPrivateProfile* functions require absolute path to the file 
+        // it will be reading from to be able to read from the application's directory
+        wchar_t lpAppName[128] = { 0 };
+        wchar_t lpKeyName[128] = { 0 };
+        wchar_t lpDefault[128] = { 0 };
+        wchar_t lpReturnedString[256] = { 0 };
+        wchar_t lpFileName[MAX_PATH] = { 0 };
+        wchar_t lpBuffer[MAX_PATH] = { 0 };
+
+        fclose(fp);
+
+        GetCurrentDirectoryW(_countof(lpBuffer), lpBuffer);
+        wcscat_s(lpFileName, _countof(lpFileName), lpBuffer);
+        wcscat_s(lpFileName, _countof(lpFileName), L"\\");
+        wcscat_s(lpFileName, _countof(lpFileName), themeFile);
+
+        wcscpy_s(lpAppName, _countof(lpAppName), L"IMGUI_THEME");
+
+        ImGuiStyle& style = ImGui::GetStyle();
+
+        swprintf_s(lpKeyName, _countof(lpKeyName), L"Alpha");
+        ret = GetPrivateProfileStringW(lpAppName, lpKeyName, lpDefault, lpReturnedString, _countof(lpReturnedString), lpFileName);
+        if (ret != 0)
+        {
+            style.Alpha = wcstof(lpReturnedString, NULL);
+        }
+
+        swprintf_s(lpKeyName, _countof(lpKeyName), L"FrameRounding");
+        ret = GetPrivateProfileStringW(lpAppName, lpKeyName, lpDefault, lpReturnedString, _countof(lpReturnedString), lpFileName);
+        if (ret != 0)
+        {
+            style.FrameRounding = wcstof(lpReturnedString, NULL);
+        }
+
+        for (i = 0; i < ImGuiCol_COUNT; i++)
+        {
+            swprintf_s(lpKeyName, _countof(lpKeyName), themeElements[i]);
+            ret = GetPrivateProfileStringW(lpAppName, lpKeyName, lpDefault, lpReturnedString, _countof(lpReturnedString), lpFileName);
+            if (ret != 0)
+            {
+                unsigned int color = wcstoul(lpReturnedString, NULL, 16);
+                style.Colors[i] = ImVec4(
+                    ((color >> 16) & 0xFF) * s,
+                    ((color >>  8) & 0xFF) * s,
+                    ((color >>  0) & 0xFF) * s,
+                    ((color >> 24) & 0xFF) * s);
+            }
+        }
+    }
 }
