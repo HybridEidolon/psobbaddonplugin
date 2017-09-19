@@ -312,8 +312,10 @@ void loadCustomTheme()
     int i;
     float s = 1.0f / 255.0f;
     wchar_t *themeFile = L"addons\\theme.ini";
+    const ImGuiIO default_io;
     const ImGuiStyle default_style;
 
+    ImGuiIO& io = ImGui::GetIO();
     ImGuiStyle& style = ImGui::GetStyle();
 
     // GetPrivateProfile* functions require absolute path to the file 
@@ -330,41 +332,55 @@ void loadCustomTheme()
     wcscat_s(lpFileName, _countof(lpFileName), L"\\");
     wcscat_s(lpFileName, _countof(lpFileName), themeFile);
 
-    wcscpy_s(lpAppName, _countof(lpAppName), L"IMGUI_THEME");
+    wcscpy_s(lpAppName, _countof(lpAppName), L"ImGuiIO");
 
-    // If the file is not present or the theme is disabled in the file
-    // reset the theme and return
+    // IO Font scale
+    swprintf_s(lpKeyName, _countof(lpKeyName), L"FontGlobalScale");
+    ret = GetPrivateProfileStringW(lpAppName, lpKeyName, lpDefault, lpReturnedString, _countof(lpReturnedString), lpFileName);
+    if (ret != 0)
+    {
+        io.FontGlobalScale = wcstof(lpReturnedString, NULL);
+    }
+    else
+    {
+        io.FontGlobalScale = default_io.FontGlobalScale;
+    }
+
+    wcscpy_s(lpAppName, _countof(lpAppName), L"ImGuiStyle");
+
+    // Theme stuff
     swprintf_s(lpKeyName, _countof(lpKeyName), L"UseCustomTheme");
     ret = GetPrivateProfileIntW(lpAppName, lpKeyName, -1, lpFileName);
-    if (ret != 1)
+    if (ret == 1)
+    {
+        swprintf_s(lpKeyName, _countof(lpKeyName), L"Alpha");
+        ret = GetPrivateProfileStringW(lpAppName, lpKeyName, lpDefault, lpReturnedString, _countof(lpReturnedString), lpFileName);
+        if (ret != 0)
+        {
+            style.Alpha = wcstof(lpReturnedString, NULL);
+        }
+
+        for (i = 0; i < ImGuiCol_COUNT; i++)
+        {
+            swprintf_s(lpKeyName, _countof(lpKeyName), themeElements[i]);
+            ret = GetPrivateProfileStringW(lpAppName, lpKeyName, lpDefault, lpReturnedString, _countof(lpReturnedString), lpFileName);
+            if (ret != 0)
+            {
+                unsigned int color = wcstoul(lpReturnedString, NULL, 16);
+                style.Colors[i] = ImVec4(
+                    ((color >> 16) & 0xFF) * s,
+                    ((color >> 8) & 0xFF) * s,
+                    ((color >> 0) & 0xFF) * s,
+                    ((color >> 24) & 0xFF) * s);
+            }
+        }
+    }
+    else
     {
         style.Alpha = default_style.Alpha;
         for (i = 0; i < ImGuiCol_COUNT; i++)
         {
             style.Colors[i] = default_style.Colors[i];
-        }
-        return;
-    }
-
-    swprintf_s(lpKeyName, _countof(lpKeyName), L"Alpha");
-    ret = GetPrivateProfileStringW(lpAppName, lpKeyName, lpDefault, lpReturnedString, _countof(lpReturnedString), lpFileName);
-    if (ret != 0)
-    {
-        style.Alpha = wcstof(lpReturnedString, NULL);
-    }
-
-    for (i = 0; i < ImGuiCol_COUNT; i++)
-    {
-        swprintf_s(lpKeyName, _countof(lpKeyName), themeElements[i]);
-        ret = GetPrivateProfileStringW(lpAppName, lpKeyName, lpDefault, lpReturnedString, _countof(lpReturnedString), lpFileName);
-        if (ret != 0)
-        {
-            unsigned int color = wcstoul(lpReturnedString, NULL, 16);
-            style.Colors[i] = ImVec4(
-                ((color >> 16) & 0xFF) * s,
-                ((color >> 8) & 0xFF) * s,
-                ((color >> 0) & 0xFF) * s,
-                ((color >> 24) & 0xFF) * s);
         }
     }
 }
