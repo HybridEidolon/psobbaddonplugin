@@ -349,38 +349,22 @@ void loadCustomTheme()
     wcscpy_s(lpAppName, _countof(lpAppName), L"ImGuiStyle");
 
     // Theme stuff
-    swprintf_s(lpKeyName, _countof(lpKeyName), L"UseCustomTheme");
-    ret = GetPrivateProfileIntW(lpAppName, lpKeyName, -1, lpFileName);
-    if (ret == 1)
-    {
-        swprintf_s(lpKeyName, _countof(lpKeyName), L"Alpha");
-        ret = GetPrivateProfileStringW(lpAppName, lpKeyName, lpDefault, lpReturnedString, _countof(lpReturnedString), lpFileName);
-        if (ret != 0)
-        {
-            style.Alpha = wcstof(lpReturnedString, NULL);
-        }
-
-        for (i = 0; i < ImGuiCol_COUNT; i++)
-        {
-            swprintf_s(lpKeyName, _countof(lpKeyName), themeElements[i]);
-            ret = GetPrivateProfileStringW(lpAppName, lpKeyName, lpDefault, lpReturnedString, _countof(lpReturnedString), lpFileName);
-            if (ret != 0)
-            {
-                unsigned int color = wcstoul(lpReturnedString, NULL, 16);
-                style.Colors[i] = ImVec4(
-                    ((color >> 16) & 0xFF) * s,
-                    ((color >> 8) & 0xFF) * s,
-                    ((color >> 0) & 0xFF) * s,
-                    ((color >> 24) & 0xFF) * s);
-            }
-        }
+    swprintf_s(lpKeyName, _countof(lpKeyName), L"Alpha");
+    ret = GetPrivateProfileStringW(lpAppName, lpKeyName, lpDefault, lpReturnedString, _countof(lpReturnedString), lpFileName);
+    if (ret != 0) {
+        style.Alpha = wcstof(lpReturnedString, NULL);
     }
-    else
-    {
-        style.Alpha = default_style.Alpha;
-        for (i = 0; i < ImGuiCol_COUNT; i++)
-        {
-            style.Colors[i] = default_style.Colors[i];
+
+    for (i = 0; i < ImGuiCol_COUNT; i++) {
+        swprintf_s(lpKeyName, _countof(lpKeyName), themeElements[i]);
+        ret = GetPrivateProfileStringW(lpAppName, lpKeyName, lpDefault, lpReturnedString, _countof(lpReturnedString), lpFileName);
+        if (ret != 0) {
+            unsigned int color = wcstoul(lpReturnedString, NULL, 16);
+            style.Colors[i] = ImVec4(
+                ((color >> 16) & 0xFF) * s,
+                ((color >> 8) & 0xFF) * s,
+                ((color >> 0) & 0xFF) * s,
+                ((color >> 24) & 0xFF) * s);
         }
     }
 }
