@@ -354,6 +354,10 @@ void loadCustomTheme()
     if (ret != 0) {
         style.Alpha = wcstof(lpReturnedString, NULL);
     }
+    else
+    {
+        style.Alpha = default_style.Alpha;
+    }
 
     for (i = 0; i < ImGuiCol_COUNT; i++) {
         swprintf_s(lpKeyName, _countof(lpKeyName), themeElements[i]);
@@ -365,6 +369,10 @@ void loadCustomTheme()
                 ((color >> 8) & 0xFF) * s,
                 ((color >> 0) & 0xFF) * s,
                 ((color >> 24) & 0xFF) * s);
+        }
+        else
+        {
+            style.Colors[i] = default_style.Colors[i];
         }
     }
 }
