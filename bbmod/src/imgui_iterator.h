@@ -1,3 +1,5 @@
+#pragma warning (disable : 4244)
+
 //    IMGUI_API ImGuiIO&      GetIO();
 // Unsupported return type ImGuiIO&
 //    IMGUI_API ImGuiStyle&   GetStyle();

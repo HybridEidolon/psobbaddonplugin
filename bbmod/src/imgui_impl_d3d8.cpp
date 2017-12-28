@@ -106,9 +106,9 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
     if (oldWinProc != nullptr) {
         oldWinProc(hWnd, msg, wParam, lParam);
-    } else {
-        return DefWindowProc(hWnd, msg, wParam, lParam);
     }
+
+    return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 
 static void build_mask_vbuffer(const RECT* rect) {
