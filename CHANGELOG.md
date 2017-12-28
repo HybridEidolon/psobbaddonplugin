@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## Unreleased
+
+### Added
+
+- `get_cwd` returns a string of the cwd (@jtuu #17)
+- `play_sound` invokes winmm PlaySound with given path, ignoring errors (@jtuu #17)
+- `is_pso_focused` returns a boolean of whether or not the PSOBB HWND
+  is the active window. (@jtuu #17)
+
 ## v0.3.4
 
 ### Fixed
