@@ -1,8 +1,9 @@
-﻿#include <iostream>
+#include <iostream>
 #include <fstream>
 #include <string>
 
 #include <Windows.h>
+#define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
 
 //#include "physfs.h"
@@ -125,7 +126,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
 
 HRESULT WINAPI DirectInput8Create(HINSTANCE inst_handle, DWORD version, const IID& r_iid, LPVOID* out_wrapper, LPUNKNOWN p_unk) {
     GUID aguid = {
-        3212410928, 18490, 19874, { 170, 153, 93, 100, 237, 54, 151, 0 }
+        3212410928, 18490, 19874,{ 170, 153, 93, 100, 237, 54, 151, 0 }
     };
 
     if (r_iid == aguid) {
