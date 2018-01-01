@@ -28,6 +28,8 @@ To build the plugin dll, use Visual Studio 2015.
 
 Press the \` key to open the Main Menu of the addon.
 
+The UI theme is configured via the `addons/theme.ini` file.
+
 ## Changelog
 
 See CHANGELOG.md for more info

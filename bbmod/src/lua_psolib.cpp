@@ -7,7 +7,7 @@
 #include "luastate.h"
 #include "log.h"
 #include "wrap_imgui_impl.h"
-
+#define PSOBB_HWND_PTR (HWND*)(0x00ACBED8 - 0x00400000 + g_PSOBaseAddress)
 static int wrap_exceptions(lua_State *L, lua_CFunction f);
 static int psolua_print(lua_State *L);
 static std::string psolualib_read_cstr(int memory_address, int len = 2048);
@@ -109,6 +109,21 @@ void psolua_restore_fpu_state(struct FPUSTATE& fpustate) {
     }
 }
 
+void play_sound(std::string soundPath) {
+    PlaySoundA(soundPath.c_str(), NULL, SND_FILENAME | SND_NODEFAULT | SND_ASYNC);
+}
+
+bool is_pso_focused() {
+    return GetActiveWindow() == *PSOBB_HWND_PTR;
+}
+
+static std::string get_cwd() {
+    wchar_t* buf = _wgetcwd(NULL, 255);
+    std::wstring ws(buf);
+    free(buf);
+    return std::string(ws.begin(), ws.end());
+}
+
 void psolua_load_library(lua_State * L) {
     sol::state_view lua(L);
 
@@ -136,6 +151,9 @@ void psolua_load_library(lua_State * L) {
     psoTable["base_address"] = g_PSOBaseAddress;
     psoTable["list_addon_directories"] = psolualib_list_addons;
     psoTable["log_items"] = lua.create_table();
+    psoTable["get_cwd"] = get_cwd;
+    psoTable["play_sound"] = play_sound;
+    psoTable["is_pso_focused"] = is_pso_focused;
     lua["print"]("PSOBB Base address is ", g_PSOBaseAddress);
 
     // Exception handling
