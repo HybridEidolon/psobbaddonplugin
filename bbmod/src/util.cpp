@@ -1,7 +1,9 @@
 #include "util.h"
 
+#include <fstream>
 #include <memory>
 #include <cstdarg>
+#include <algorithm>
 
 std::string string_format(const std::string fmt_str, ...) {
     int final_n, n = ((int)fmt_str.size()) * 2; /* Reserve two times as much as the length of the fmt_str */
@@ -20,4 +22,33 @@ std::string string_format(const std::string fmt_str, ...) {
             break;
     }
     return std::string(formatted.get());
+}
+
+std::string bbmod_get_config_property(std::ifstream &infile, const std::string propname) {
+    std::string line;
+    std::string result = std::string("");
+
+    /* TODO: Proper config parsing...  */
+    infile.clear();
+    infile.seekg(0, infile._Seekbeg);
+    while (false == infile.eof()) {
+        std::getline(infile, line);
+        if (line.length()) {
+            const char *p_line = line.c_str();
+            const char *p_equal_char;
+
+            p_equal_char = strchr(p_line, '=');
+            if (p_equal_char) {
+                int property_length = p_equal_char - p_line;
+                if (property_length == propname.length() && !_strnicmp(p_line, propname.c_str(), property_length)) {
+                    /* p_equal_char points to '=', there is at least one null byte after.
+                     * Worst case is "someprop=" will make result the empty string..
+                     */
+                    result = std::string(p_equal_char + 1);
+                    break;
+                }
+            }
+        }
+    }
+    return result;
 }

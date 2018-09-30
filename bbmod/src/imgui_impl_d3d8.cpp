@@ -27,6 +27,12 @@ static LPDIRECT3DTEXTURE8       g_FontTexture = NULL;
 static int                      g_VertexBufferSize = 5000, g_IndexBufferSize = 10000;
 static IDirect3DSurface8*       g_DepthBuffer = nullptr;
 
+/* Configuration things with defaults.. TODO: Better place to put this */
+#define MAXFONTNAMELEN 256
+static const char              *g_BBMODConfigName = "bbmod/bbmod.cfg";
+static int                      g_JPFontSize = 16;
+static char                     g_JPFontName[MAXFONTNAMELEN] = { 0 };
+
 struct CUSTOMVERTEX
 {
     float    pos[3];
@@ -36,8 +42,65 @@ struct CUSTOMVERTEX
 
 #define D3DFVF_CUSTOMVERTEX (D3DFVF_XYZ|D3DFVF_DIFFUSE|D3DFVF_TEX1)
 
+
 typedef LRESULT(WINAPI *TFNWndProc)(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 static TFNWndProc oldWinProc;
+
+// Read this arbitrary config file. Note that this fails silently.
+static void read_bbmod_config() {
+    std::ifstream  cfg_file;
+    ImGuiIO       &io = ImGui::GetIO();
+    ImFontConfig   config;
+
+    config.MergeMode = true;
+    io.Fonts->AddFontDefault();
+
+    DBGLOG2CLEAR();
+    cfg_file.open(g_BBMODConfigName, std::ifstream::in);
+    if (cfg_file.is_open())
+    {
+        std::string  temp;
+        const char  *temp_cstr;
+        int          temp_n;
+
+        DBGLOG2("bbmod/bbmod.cfg is open");
+        // PROPERTY: jpfontname=<font-name-with-ttf-extension>
+        temp = bbmod_get_config_property(cfg_file, std::string("jpfontname"));
+        if (temp.length() > 0 && ((temp_cstr = temp.c_str()) != NULL))
+            snprintf(g_JPFontName, MAXFONTNAMELEN, "./%s", temp_cstr);
+        DBGLOG2("g_JPFontName: %s", g_JPFontName);
+
+        // PROPERTY: jpfontsize=<font-size-as-int>
+        temp = bbmod_get_config_property(cfg_file, std::string("jpfontsize"));
+        if (temp.length() > 0 && ((temp_cstr = temp.c_str()) != NULL) && (temp_n = atoi(temp_cstr))) {
+            if (6 <= temp_n && temp_n <= 48) { /* Arbitrary limits... */
+                g_JPFontSize = temp_n;
+            }
+        }
+        DBGLOG2("g_JPFontSize: %i", g_JPFontSize);
+
+        // Test to make sure the font file exists... Can still fail if it's not valid TTF
+        // Or if the file is not accessible just after this. Probably a good enough check
+        // for a first pass.
+        std::fstream file_test;
+        file_test.open(g_JPFontName);
+        if (file_test.is_open()) {
+            io.Fonts->AddFontFromFileTTF(g_JPFontName, (float)g_JPFontSize, &config, io.Fonts->GetGlyphRangesChinese());
+            file_test.close();
+            DBGLOG2("Successfully opened ttf %s", g_JPFontName);
+        }
+        else {
+            snprintf(g_JPFontName, MAXFONTNAMELEN, "");
+            g_JPFontSize = -1;
+            DBGLOG2("Failed to open ttf %s", g_JPFontName);
+        }
+        
+        cfg_file.close();
+    } else {
+        DBGLOG2("cfg_file not open");
+    }
+}
+
 
 IMGUI_API LRESULT ImGui_ImplD3D8_WndProcHandler(HWND, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -468,9 +531,8 @@ bool ImGui_ImplD3D8_Init(void* hwnd, IDirect3DDevice8** device) {
     io.RenderDrawListsFn = ImGui_ImplD3D8_RenderDrawLists;
     io.ImeWindowHandle = g_hWnd;
 
-    //io.Fonts->AddFontFromFileTTF("Roboto-Medium.ttf", 14);
-
-
+    read_bbmod_config();
+    
     return true;
 }
 
