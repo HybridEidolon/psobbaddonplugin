@@ -55,7 +55,6 @@ static void read_bbmod_config() {
     config.MergeMode = true;
     io.Fonts->AddFontDefault();
 
-    DBGLOG2CLEAR();
     cfg_file.open(g_BBMODConfigName, std::ifstream::in);
     if (cfg_file.is_open())
     {
@@ -63,12 +62,10 @@ static void read_bbmod_config() {
         const char  *temp_cstr;
         int          temp_n;
 
-        DBGLOG2("bbmod/bbmod.cfg is open");
         // PROPERTY: jpfontname=<font-name-with-ttf-extension>
         temp = bbmod_get_config_property(cfg_file, std::string("jpfontname"));
         if (temp.length() > 0 && ((temp_cstr = temp.c_str()) != NULL))
             snprintf(g_JPFontName, MAXFONTNAMELEN, "./%s", temp_cstr);
-        DBGLOG2("g_JPFontName: %s", g_JPFontName);
 
         // PROPERTY: jpfontsize=<font-size-as-int>
         temp = bbmod_get_config_property(cfg_file, std::string("jpfontsize"));
@@ -77,7 +74,6 @@ static void read_bbmod_config() {
                 g_JPFontSize = temp_n;
             }
         }
-        DBGLOG2("g_JPFontSize: %i", g_JPFontSize);
 
         // Test to make sure the font file exists... Can still fail if it's not valid TTF
         // Or if the file is not accessible just after this. Probably a good enough check
@@ -87,17 +83,13 @@ static void read_bbmod_config() {
         if (file_test.is_open()) {
             io.Fonts->AddFontFromFileTTF(g_JPFontName, (float)g_JPFontSize, &config, io.Fonts->GetGlyphRangesChinese());
             file_test.close();
-            DBGLOG2("Successfully opened ttf %s", g_JPFontName);
         }
         else {
             snprintf(g_JPFontName, MAXFONTNAMELEN, "");
             g_JPFontSize = -1;
-            DBGLOG2("Failed to open ttf %s", g_JPFontName);
         }
         
         cfg_file.close();
-    } else {
-        DBGLOG2("cfg_file not open");
     }
 }
 
