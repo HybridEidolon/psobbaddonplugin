@@ -125,11 +125,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
 }
 
 HRESULT WINAPI DirectInput8Create(HINSTANCE inst_handle, DWORD version, const IID& r_iid, LPVOID* out_wrapper, LPUNKNOWN p_unk) {
-    GUID aguid = {
-        3212410928, 18490, 19874,{ 170, 153, 93, 100, 237, 54, 151, 0 }
-    };
-
-    if (r_iid == aguid) {
+    if (r_iid == IID_IDirectInput8A) {
         if (!dinput8AModule) {
             auto ret = oDirectInput8Create(inst_handle, version, r_iid, out_wrapper, p_unk);
             if (ret) {

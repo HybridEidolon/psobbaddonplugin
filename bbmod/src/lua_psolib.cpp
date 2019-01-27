@@ -154,6 +154,8 @@ void psolua_load_library(lua_State * L) {
     psoTable["get_cwd"] = get_cwd;
     psoTable["play_sound"] = play_sound;
     psoTable["is_pso_focused"] = is_pso_focused;
+    psoTable["reload_custom_theme"] = []() { loadCustomTheme(); };
+
     lua["print"]("PSOBB Base address is ", g_PSOBaseAddress);
 
     // Exception handling

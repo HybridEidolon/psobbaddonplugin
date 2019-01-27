@@ -140,7 +140,7 @@ STDMETHODIMP ImguiDInputDevice::GetDeviceState(DWORD cbData, LPVOID lpvData)
 
         if (io.WantCaptureKeyboard) {
             // all keys up
-            for (int i = 0; i < cbData; i++) {
+            for (unsigned int i = 0; i < cbData; i++) {
                 keys[i] = 0;
             }
         }
