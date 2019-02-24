@@ -117,6 +117,14 @@ bool is_pso_focused() {
     return GetActiveWindow() == *PSOBB_HWND_PTR;
 }
 
+void reload_custom_theme() {
+    loadCustomTheme();
+}
+
+int get_tick_count() {
+    return GetTickCount();
+}
+
 static std::string get_cwd() {
     wchar_t* buf = _wgetcwd(NULL, 255);
     std::wstring ws(buf);
@@ -154,7 +162,8 @@ void psolua_load_library(lua_State * L) {
     psoTable["get_cwd"] = get_cwd;
     psoTable["play_sound"] = play_sound;
     psoTable["is_pso_focused"] = is_pso_focused;
-    psoTable["reload_custom_theme"] = []() { loadCustomTheme(); };
+    psoTable["reload_custom_theme"] = reload_custom_theme;
+    psoTable["get_tick_count"] = get_tick_count;
 
     lua["print"]("PSOBB Base address is ", g_PSOBaseAddress);
 
@@ -338,7 +347,7 @@ void loadCustomTheme()
     ImGuiIO& io = ImGui::GetIO();
     ImGuiStyle& style = ImGui::GetStyle();
 
-    // GetPrivateProfile* functions require absolute path to the file 
+    // GetPrivateProfile* functions require absolute path to the file
     // it will be reading from to be able to read from the application's directory
     wchar_t lpAppName[128] = { 0 };
     wchar_t lpKeyName[128] = { 0 };
