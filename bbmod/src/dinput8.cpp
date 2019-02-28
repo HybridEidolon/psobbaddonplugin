@@ -81,20 +81,50 @@ void Initialize() {
         MH_EnableHook((void*)PSOBB_INITD3D);
     }
 
-    if (!oDirectInput8Create)
-    {
+    if (!oDirectInput8Create) {
         CHAR syspath[MAX_PATH];
         GetSystemDirectory(syspath, MAX_PATH);
         strcat_s(syspath, "\\dinput8.dll");
-        HMODULE hMod = LoadLibrary(syspath);
-        oDirectInput8Create = (tDirectInput8Create)GetProcAddress(hMod, "DirectInput8Create");
+
+        CHAR dllpath[MAX_PATH];
+        GetCurrentDirectory(MAX_PATH, dllpath);
+        strcat_s(dllpath, "\\customdlls\\dinput8.dll");
+
+        WIN32_FIND_DATA FileData;
+        DWORD           dwAttrs;
+        dwAttrs = GetFileAttributes(dllpath);
+
+        if (dwAttrs != INVALID_FILE_ATTRIBUTES) {
+            HMODULE hMod = LoadLibrary(dllpath);
+            oDirectInput8Create = (tDirectInput8Create)GetProcAddress(hMod, "DirectInput8Create");
+        }
+        else {
+            HMODULE hMod = LoadLibrary(syspath);
+            oDirectInput8Create = (tDirectInput8Create)GetProcAddress(hMod, "DirectInput8Create");
+        }
     }
+
     if (!oDirect3DCreate8) {
         CHAR syspath[MAX_PATH];
         GetSystemDirectory(syspath, MAX_PATH);
         strcat_s(syspath, "\\d3d8.dll");
-        HMODULE hMod = LoadLibrary(syspath);
-        oDirect3DCreate8 = (tDirect3DCreate8)GetProcAddress(hMod, "Direct3DCreate8");
+
+        CHAR dllpath[MAX_PATH];
+        GetCurrentDirectory(MAX_PATH, dllpath);
+        strcat_s(dllpath, "\\customdlls\\d3d8.dll");
+
+        WIN32_FIND_DATA FileData;
+        DWORD           dwAttrs;
+        dwAttrs = GetFileAttributes(dllpath);
+
+        if (dwAttrs != INVALID_FILE_ATTRIBUTES) {
+            HMODULE hMod = LoadLibrary(dllpath);
+            oDirectInput8Create = (tDirectInput8Create)GetProcAddress(hMod, "Direct3DCreate8");
+        }
+        else {
+            HMODULE hMod = LoadLibrary(syspath);
+            oDirectInput8Create = (tDirectInput8Create)GetProcAddress(hMod, "Direct3DCreate8");
+        }
     }
 
     FPUSTATE fpustate;
