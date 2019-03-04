@@ -606,18 +606,18 @@ void ImGui_BetweenFrameChanges(void) {
                                 g_LoadedFont2 = ptmp;
                                 g_LoadedFontSize2 = g_NewFontSize2;
                                 strncpy(g_LoadedFontName2, g_NewFontName2, MAX_PATH);
-                                g_LoadedFontMerge = true;
+                                g_LoadedFontMergeMode = true;
                             }
                         }
                         else {
-                            g_LoadedFontMerge = false;
+                            g_LoadedFontMergeMode = false;
                             snprintf(g_LoadedFontName2, MAX_PATH, "");
                             g_LoadedFontSize2 = 13;
                             g_LoadedFont2 = NULL;
                         }
                     }
                     else {
-                        g_LoadedFontMerge = false;
+                        g_LoadedFontMergeMode = false;
                         snprintf(g_LoadedFontName2, MAX_PATH, "");
                         g_LoadedFontSize2 = 13;
                         g_LoadedFont2 = NULL;
