@@ -3,6 +3,7 @@
 struct IDirect3DDevice8;
 struct ImFont;
 extern ImFont *g_LoadedFont;
+extern bool g_LoadedFontMergeMode;
 
 bool ImGui_ImplD3D8_Init(void* hwnd, IDirect3DDevice8** device);
 void ImGui_ImplD3D8_Shutdown(void);

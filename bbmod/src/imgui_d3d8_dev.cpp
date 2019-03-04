@@ -101,10 +101,6 @@ STDMETHODIMP ImguiD3D8Device::Present(CONST RECT * pSourceRect, CONST RECT * pDe
             ImGui::End();
         }
 
-        // Pop custom font if specified. Must be done before Render().
-        if (g_LoadedFont && GImGui->Font == g_LoadedFont)
-            ImGui::PopFont();
-
         ImGui::Render();
 
         device->EndScene();
