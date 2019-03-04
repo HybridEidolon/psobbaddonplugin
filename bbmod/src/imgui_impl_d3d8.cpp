@@ -562,7 +562,8 @@ void ImGui_BetweenFrameChanges(void) {
                 ImGui::GetIO().Fonts->TexID = 0;
             }
             io.Fonts->Clear();
-                        
+
+            
             // Sanity check that the file exists, of course this could fail right after but
             // we should try to prevent some failures.
             std::fstream file_test;
@@ -586,6 +587,8 @@ void ImGui_BetweenFrameChanges(void) {
                 snprintf(g_LoadedFontName, MAX_PATH, "");
                 g_LoadedFontSize = 13; // set to default font size
                 g_LoadedFont = NULL;
+                io.Fonts->AddFontDefault();
+                ImGui_ImplDX9_CreateFontsTexture(); 
             }
         }
     }
