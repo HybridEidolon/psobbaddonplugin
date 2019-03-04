@@ -433,13 +433,26 @@ void psolualib_change_global_font(std::string font_name, float font_size, int ov
 // List the files in a directory and return it to the addon
 sol::table psolualib_list_directory_files(std::string addon_name) {
     sol::state_view lua(g_LuaState);
+    const char     *paddonName = addon_name.c_str();
     char            addonPath[MAX_PATH];
     HANDLE          hFind;
     WIN32_FIND_DATA find;
     sol::table      ret = lua.create_table();
 
+    for (int i = 0; i < strlen(paddonName); ++i)
+    {
+        char a = paddonName[i];
+        // Don't allow checking other dirs
+        if (!((' ' == a) ||
+              ('A' <= a && a <= 'Z') ||
+              ('a' <= a && a <= 'z') ||
+              ('0' <= a && a <= '9')))
+            throw "Invalid addon name specified";
+    }
+
     snprintf(addonPath, MAX_PATH, "addons/%s/*", addon_name.c_str());
     addonPath[MAX_PATH - 1] = '\0';
+
     hFind = FindFirstFileA(addonPath, &find);
     do {
         std::string filename(find.cFileName);
