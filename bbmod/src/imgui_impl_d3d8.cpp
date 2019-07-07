@@ -64,6 +64,33 @@ struct CUSTOMVERTEX
 typedef LRESULT(WINAPI *TFNWndProc)(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 static TFNWndProc oldWinProc;
 
+LONG psobb_resolution_x() { return *(int *)0x9006F4; }
+LONG psobb_resolution_y() { return *(int *)0x9006F8; }
+
+// Convert the WM_MOUSEMOVE parameter coordinates from Windows screen coordinates (relative to the view) to ImGui coordinates.
+static void ImGui_ImplD3D8_ConvertMouseCoordsToImGui(signed short xMouse, signed short yMouse)
+{
+    ImGuiIO& io = ImGui::GetIO();
+    RECT rect;
+    GetClientRect(g_hWnd, &rect);
+    double xView = (double)(rect.right - rect.left);
+    double yView = (double)(rect.bottom - rect.top);
+    double xRes = (double)psobb_resolution_x();
+    double yRes = (double)psobb_resolution_y();
+    if (xView > 0 && yView > 0)
+    {
+        double xMouseScaled = (double)xMouse * (xRes / xView);
+        double yMouseScaled = (double)yMouse * (yRes / yView);
+        io.MousePos.x = (float)xMouseScaled;
+        io.MousePos.y = (float)yMouseScaled;
+    }
+    else
+    {
+        io.MousePos.x = xMouse;
+        io.MousePos.y = yMouse;
+    }
+}
+
 IMGUI_API LRESULT ImGui_ImplD3D8_WndProcHandler(HWND, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     ImGuiIO& io = ImGui::GetIO();
@@ -98,8 +125,7 @@ IMGUI_API LRESULT ImGui_ImplD3D8_WndProcHandler(HWND, UINT msg, WPARAM wParam, L
         if (io.WantCaptureMouse) return true;
         break;
     case WM_MOUSEMOVE:
-        io.MousePos.x = (signed short)(lParam);
-        io.MousePos.y = (signed short)(lParam >> 16);
+        ImGui_ImplD3D8_ConvertMouseCoordsToImGui((signed short)(lParam), (signed short)(lParam >> 16));
         if (io.WantCaptureMouse) return true;
         break;
     case WM_KEYDOWN:
@@ -509,10 +535,13 @@ void ImGui_ImplD3D8_NewFrame(void) {
 
     ImGuiIO& io = ImGui::GetIO();
     
-    // Setup display size (every frame to accommodate for window resizing)
-    RECT rect;
-    GetClientRect(g_hWnd, &rect);
-    io.DisplaySize = ImVec2((float)(rect.right - rect.left), (float)(rect.bottom - rect.top));
+    // Set displaySize to the rendering size. Suppose you're running 1024x768
+    // on a monitor currently set to 1920x1080, and you're running fullscreen.
+    // We want imgui to use 1024x768 for the DisplaySize and scale the UI up.
+    // If we were to render with 1920x1080, then the image would be scaled down
+    // and lose pixels, which makes text and more elements unreadable.
+    io.DisplaySize.x = (float)psobb_resolution_x();
+    io.DisplaySize.y = (float)psobb_resolution_y();
 
     // Setup time step
     INT64 current_time;
