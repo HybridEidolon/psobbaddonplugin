@@ -4,6 +4,8 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include <list>
+#include <iterator>
 
 #include "imgui/imgui.h"
 #include "d3d8.h"
@@ -12,6 +14,8 @@
 #include "imgui_d3d8_dev.h"
 #include "util.h"
 #include "luastate.h"
+#include "shlwapi.h"
+
 
 static HWND g_hWnd;
 //static IDirect3DDevice8* g_device;
@@ -27,6 +31,27 @@ static LPDIRECT3DTEXTURE8       g_FontTexture = NULL;
 static int                      g_VertexBufferSize = 5000, g_IndexBufferSize = 10000;
 static IDirect3DSurface8*       g_DepthBuffer = nullptr;
 
+/* Currently loaded font info */
+ImFont                         *g_LoadedFont = NULL;
+ImFont                         *g_LoadedFont2 = NULL;
+float                           g_LoadedFontSize = 16;
+float                           g_LoadedFontSize2 = 16;
+char                            g_LoadedFontName[MAX_PATH] = { 0 };
+char                            g_LoadedFontName2[MAX_PATH] = { 0 };
+int                             g_LoadedFontOversampleH = 1;
+int                             g_LoadedFontOversampleV = 1;
+bool                            g_LoadedFontMergeMode = false;
+
+/* Desired new font */
+bool                            g_NewFontSpecified = false;
+float                           g_NewFontSize = 16;
+char                            g_NewFontName[MAX_PATH] = { 0 };
+int                             g_NewFontOversampleH = 1;
+int                             g_NewFontOversampleV = 1;
+bool                            g_MergeFonts;
+char                            g_NewFontName2[MAX_PATH] = { 0 };
+float                           g_NewFontSize2 = 16;
+
 struct CUSTOMVERTEX
 {
     float    pos[3];
@@ -38,6 +63,33 @@ struct CUSTOMVERTEX
 
 typedef LRESULT(WINAPI *TFNWndProc)(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 static TFNWndProc oldWinProc;
+
+LONG psobb_resolution_x() { return *(int *)0x9006F4; }
+LONG psobb_resolution_y() { return *(int *)0x9006F8; }
+
+// Convert the WM_MOUSEMOVE parameter coordinates from Windows screen coordinates (relative to the view) to ImGui coordinates.
+static void ImGui_ImplD3D8_ConvertMouseCoordsToImGui(signed short xMouse, signed short yMouse)
+{
+    ImGuiIO& io = ImGui::GetIO();
+    RECT rect;
+    GetClientRect(g_hWnd, &rect);
+    double xView = (double)(rect.right - rect.left);
+    double yView = (double)(rect.bottom - rect.top);
+    double xRes = (double)psobb_resolution_x();
+    double yRes = (double)psobb_resolution_y();
+    if (xView > 0 && yView > 0)
+    {
+        double xMouseScaled = (double)xMouse * (xRes / xView);
+        double yMouseScaled = (double)yMouse * (yRes / yView);
+        io.MousePos.x = (float)xMouseScaled;
+        io.MousePos.y = (float)yMouseScaled;
+    }
+    else
+    {
+        io.MousePos.x = xMouse;
+        io.MousePos.y = yMouse;
+    }
+}
 
 IMGUI_API LRESULT ImGui_ImplD3D8_WndProcHandler(HWND, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -73,8 +125,7 @@ IMGUI_API LRESULT ImGui_ImplD3D8_WndProcHandler(HWND, UINT msg, WPARAM wParam, L
         if (io.WantCaptureMouse) return true;
         break;
     case WM_MOUSEMOVE:
-        io.MousePos.x = (signed short)(lParam);
-        io.MousePos.y = (signed short)(lParam >> 16);
+        ImGui_ImplD3D8_ConvertMouseCoordsToImGui((signed short)(lParam), (signed short)(lParam >> 16));
         if (io.WantCaptureMouse) return true;
         break;
     case WM_KEYDOWN:
@@ -431,7 +482,7 @@ void ImGui_ImplDX9_InvalidateDeviceObjects()
 
 bool ImGui_ImplD3D8_Init(void* hwnd, IDirect3DDevice8** device) {
     g_hWnd = (HWND)hwnd;
-
+    
     oldWinProc = (TFNWndProc) GetWindowLong(g_hWnd, GWL_WNDPROC);
     SetWindowLong(g_hWnd, GWL_WNDPROC, (LONG)WndProc);
 
@@ -468,8 +519,8 @@ bool ImGui_ImplD3D8_Init(void* hwnd, IDirect3DDevice8** device) {
     io.RenderDrawListsFn = ImGui_ImplD3D8_RenderDrawLists;
     io.ImeWindowHandle = g_hWnd;
 
-    //io.Fonts->AddFontFromFileTTF("Roboto-Medium.ttf", 14);
-
+    // Add default font
+    io.Fonts->AddFontDefault();
 
     return true;
 }
@@ -483,11 +534,14 @@ void ImGui_ImplD3D8_NewFrame(void) {
         ImGui_ImplDX9_CreateDeviceObjects();
 
     ImGuiIO& io = ImGui::GetIO();
-
-    // Setup display size (every frame to accommodate for window resizing)
-    RECT rect;
-    GetClientRect(g_hWnd, &rect);
-    io.DisplaySize = ImVec2((float)(rect.right - rect.left), (float)(rect.bottom - rect.top));
+    
+    // Set displaySize to the rendering size. Suppose you're running 1024x768
+    // on a monitor currently set to 1920x1080, and you're running fullscreen.
+    // We want imgui to use 1024x768 for the DisplaySize and scale the UI up.
+    // If we were to render with 1920x1080, then the image would be scaled down
+    // and lose pixels, which makes text and more elements unreadable.
+    io.DisplaySize.x = (float)psobb_resolution_x();
+    io.DisplaySize.y = (float)psobb_resolution_y();
 
     // Setup time step
     INT64 current_time;
@@ -511,4 +565,108 @@ void ImGui_ImplD3D8_NewFrame(void) {
 
     // Start the frame
     ImGui::NewFrame();
+}
+
+// Change the font if necessary... Really need to clean up how the arguments are passed through globals
+void ImGui_BetweenFrameChanges(void) {
+    ImGuiIO& io = ImGui::GetIO();
+
+    if (g_NewFontSpecified) {
+        // Clear flag so we try this once until user makes another change
+        g_NewFontSpecified = false;
+
+        // Check if something changed. Font names, font sizes, oversampling, or merge mode
+        if (strncmp(g_NewFontName, g_LoadedFontName, MAX_PATH) ||
+            strncmp(g_NewFontName2, g_LoadedFontName2, MAX_PATH) ||
+            abs(g_LoadedFontSize - g_NewFontSize) > 0.01 ||
+            abs(g_LoadedFontSize2 - g_NewFontSize2) > 0.01 || 
+            g_NewFontOversampleH != g_LoadedFontOversampleH ||
+            g_NewFontOversampleV != g_LoadedFontOversampleV ||
+            g_LoadedFontMergeMode != g_MergeFonts) {
+
+            // Something changed
+
+            ImFontConfig font_cfg = ImFontConfig();
+            font_cfg.SizePixels = g_NewFontSize;
+            font_cfg.MergeMode = false;
+            font_cfg.OversampleH = g_NewFontOversampleH;
+            font_cfg.OversampleV = g_NewFontOversampleV;
+
+            // Free up memory and clear the font atlas
+            if (LPDIRECT3DTEXTURE8 tex = (LPDIRECT3DTEXTURE8)ImGui::GetIO().Fonts->TexID) {
+                tex->Release();
+                ImGui::GetIO().Fonts->TexID = 0;
+            }
+            io.Fonts->Clear();
+
+            // Sanity check that the file exists, of course this could fail right after but
+            // we should try to prevent some failures.
+            std::fstream file_test;
+            file_test.open(g_NewFontName);
+            if (file_test.is_open()) {
+                file_test.close();
+
+                ImFont *ptmp;
+                // Load the font, if we are merging fonts then load only default glyph range
+                ptmp = io.Fonts->AddFontFromFileTTF(g_NewFontName, g_NewFontSize, &font_cfg,
+                                    g_MergeFonts ? io.Fonts->GetGlyphRangesDefault() : io.Fonts->GetGlyphRangesChinese());
+                if (ptmp) {
+                    // Font was loaded successfully, save the info about it.
+                    g_LoadedFont = ptmp;
+                    g_LoadedFontSize = g_NewFontSize;
+                    strncpy(g_LoadedFontName, g_NewFontName, MAX_PATH);
+                    g_LoadedFontOversampleH = g_NewFontOversampleH;
+                    g_LoadedFontOversampleV = g_NewFontOversampleV;
+
+                    if (g_MergeFonts) {
+                        // Now we try to load the merged font if specified
+                        // But first we do another sanity check to prevent imgui from failing
+                        file_test.open(g_NewFontName2);
+                        if (file_test.is_open()) {
+                            file_test.close();
+
+                            // Merge this font into the previously loaded font
+                            font_cfg.SizePixels = g_NewFontSize2;
+                            font_cfg.MergeMode = true;
+
+                            ptmp = io.Fonts->AddFontFromFileTTF(g_NewFontName2, g_NewFontSize2, &font_cfg, io.Fonts->GetGlyphRangesChinese());
+                            if (ptmp) {
+                                // Loaded successfully
+                                g_LoadedFont2 = ptmp;
+                                g_LoadedFontSize2 = g_NewFontSize2;
+                                strncpy(g_LoadedFontName2, g_NewFontName2, MAX_PATH);
+                                g_LoadedFontMergeMode = true;
+                            }
+                        }
+                        else {
+                            g_LoadedFontMergeMode = false;
+                            snprintf(g_LoadedFontName2, MAX_PATH, "");
+                            g_LoadedFontSize2 = 13;
+                            g_LoadedFont2 = NULL;
+                        }
+                    }
+                    else {
+                        g_LoadedFontMergeMode = false;
+                        snprintf(g_LoadedFontName2, MAX_PATH, "");
+                        g_LoadedFontSize2 = 13;
+                        g_LoadedFont2 = NULL;
+                    }
+
+
+                    ImGui_ImplDX9_CreateFontsTexture();
+                }
+            }
+            else {
+                // Failed to load, we also cleared the current font above and we may be able to
+                // restore it, but we'll leave it up to addon to provide correct file.
+                snprintf(g_LoadedFontName, MAX_PATH, "");
+                g_LoadedFontSize = 13; 
+                g_LoadedFont = NULL;
+
+                // Setup the default font so that we can keep the client running
+                io.Fonts->AddFontDefault();
+                ImGui_ImplDX9_CreateFontsTexture(); 
+            }
+        }
+    }
 }

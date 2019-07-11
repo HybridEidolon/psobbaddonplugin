@@ -1,4 +1,4 @@
-﻿#include "imgui_d3d8_dev.h"
+#include "imgui_d3d8_dev.h"
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_internal.h"
@@ -94,8 +94,8 @@ STDMETHODIMP ImguiD3D8Device::Present(CONST RECT * pSourceRect, CONST RECT * pDe
 
     psolua_restore_fpu_state(fpustate);
     if (device->BeginScene() >= 0) {
-        // Prevent imgui from asserting.
 
+        // Prevent imgui from asserting.
         while (GImGui->CurrentWindowStack.Size > 1) {
             g_log << "[assert avoided] Match your imgui.Begin's with imgui.End's!" << std::endl;
             ImGui::End();
@@ -106,6 +106,8 @@ STDMETHODIMP ImguiD3D8Device::Present(CONST RECT * pSourceRect, CONST RECT * pDe
         device->EndScene();
 
     }
+
+    ImGui_BetweenFrameChanges();
 
     auto ret = device->Present(pSourceRect, pDestRect, hDestWindowOverride, pDirtyRegion);
     ImGui_ImplD3D8_NewFrame();

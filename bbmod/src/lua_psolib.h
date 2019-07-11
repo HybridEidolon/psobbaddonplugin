@@ -5,6 +5,16 @@
 
 struct lua_State;
 
+// Globals used to pass this info from lua to rest of the plugin...
+extern bool    g_NewFontSpecified;
+extern float   g_NewFontSize;
+extern char    g_NewFontName[];
+extern int     g_NewFontOversampleH;
+extern int     g_NewFontOversampleV;
+extern bool    g_MergeFonts;
+extern char    g_NewFontName2[];
+extern float   g_NewFontSize2;
+
 extern DWORD g_PSOBaseAddress;
 
 std::string psolualib_error_handler(std::string msg);

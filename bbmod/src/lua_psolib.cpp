@@ -15,10 +15,29 @@ static std::string psolualib_read_wstr(int memory_address, int len = 1024);
 static sol::table psolualib_read_mem(sol::table t, int memory_address, int len);
 static std::string psolualib_read_mem_str(int memory_address, int len = 2048);
 static sol::table psolualib_list_addons();
+static void psolualib_change_global_font(std::string font_name, float font_size, int oversampleH = 1, int oversampleV = 1,
+                                         bool mergeFonts = false, std::string font_name2 = "", float font_size2 = -1);
+static sol::table psolualib_list_directory_files(std::string addon_name);
+static sol::table psolualib_get_language_table();
+static void psolualib_set_language(std::string lang = "EN");
+static std::string psolualib_get_language();
 
 bool psolua_initialize_on_next_frame = false;
 
 DWORD g_PSOBaseAddress;
+
+std::string g_LanguageSetting = "EN"; // default EN
+
+const char *g_LanguageTable[] = {
+    "EN",  // English (default)
+    "JP",  // Japanese
+    "ES",  // Spanish
+    "FR",  // French
+    "PT",  // Portuguese
+    "CN"   // Chinese
+};
+
+
 
 // Catch C++ exceptions and convert them to Lua error messages.
 // Customize as needed for your own exception classes.
@@ -155,7 +174,11 @@ void psolua_load_library(lua_State * L) {
     psoTable["play_sound"] = play_sound;
     psoTable["is_pso_focused"] = is_pso_focused;
     psoTable["reload_custom_theme"] = []() { loadCustomTheme(); };
-
+    psoTable["change_global_font"] = psolualib_change_global_font;
+    psoTable["list_directory_files"] = psolualib_list_directory_files;
+    psoTable["set_language"] = psolualib_set_language;
+    psoTable["get_language"] = psolualib_get_language;
+    psoTable["list_languages"] = psolualib_get_language_table;
     lua["print"]("PSOBB Base address is ", g_PSOBaseAddress);
 
     // Exception handling
@@ -396,3 +419,86 @@ void loadCustomTheme()
         }
     }
 }
+
+
+// Change global font settings. Must be done between frames but we're in a frame, so we set some globals and it'll be handled later.
+void psolualib_change_global_font(std::string font_name, float font_size, int oversampleH, int oversampleV,
+                                  bool mergeFonts, std::string font_name2, float font_size2) {
+    g_NewFontSpecified = true;
+    g_NewFontSize = font_size;
+    g_NewFontOversampleH = oversampleH;
+    g_NewFontOversampleV = oversampleV;
+    strncpy(g_NewFontName, font_name.c_str(), MAX_PATH);
+    g_NewFontName[MAX_PATH - 1] = '\0';
+
+    g_MergeFonts = mergeFonts;
+    strncpy(g_NewFontName2, font_name2.c_str(), MAX_PATH);
+    g_NewFontName2[MAX_PATH - 1] = '\0';
+    g_NewFontSize2 = font_size2;
+}
+
+// List the files in a directory and return it to the addon
+sol::table psolualib_list_directory_files(std::string addon_name) {
+    sol::state_view lua(g_LuaState);
+    const char     *paddonName = addon_name.c_str();
+    char            addonPath[MAX_PATH];
+    HANDLE          hFind;
+    WIN32_FIND_DATA find;
+    sol::table      ret = lua.create_table();
+
+    for (size_t i = 0; i < strlen(paddonName); ++i)
+    {
+        char a = paddonName[i];
+        // Don't allow going up and down directory structure...
+        // An addon could specify a different directory but this is probably okay.
+        if (!((' ' == a) ||
+              ('A' <= a && a <= 'Z') ||
+              ('a' <= a && a <= 'z') ||
+              ('0' <= a && a <= '9')))
+            throw "Invalid addon name specified";
+    }
+
+    snprintf(addonPath, MAX_PATH, "addons/%s/*", addon_name.c_str());
+    addonPath[MAX_PATH - 1] = '\0';
+
+    hFind = FindFirstFileA(addonPath, &find);
+    do {
+        std::string filename(find.cFileName);
+        if (filename == "..") continue;
+        if (filename == ".") continue;
+        if (!(find.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
+            ret.add(filename);
+        }
+    } while (FindNextFileA(hFind, &find));
+
+    return ret;
+}
+
+sol::table psolualib_get_language_table() {
+    sol::state_view lua(g_LuaState);
+    sol::table      ret = lua.create_table();
+
+    for (int i = 0; i < (sizeof(g_LanguageTable) / sizeof(char *)); ++i) {
+        ret.add(g_LanguageTable[i]);
+    }
+
+    return ret;
+}
+
+void psolualib_set_language(std::string lang) {
+    const int   MAX_LANG_SETTING_SIZE = 3; 
+    const char *plangcstr = lang.c_str();
+
+    for (int i = 0; i < (sizeof(g_LanguageTable) / sizeof(char *)); ++i) {
+        const char *plookup = g_LanguageTable[i];
+        if (_strnicmp(plangcstr, plookup, MAX_LANG_SETTING_SIZE) == 0) {
+            g_LanguageSetting = plookup;
+            break;
+        }
+    }
+}
+
+std::string psolualib_get_language() {
+    return g_LanguageSetting;
+}
+
