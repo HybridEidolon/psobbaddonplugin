@@ -82,12 +82,10 @@ static void psolualib_set_sleep_hack_enabled(bool enabled) {
 }
 
 template <typename T> std::function<T(int)> read_t(void) {
-    auto pid = GetCurrentProcess();
     return [=](int addr) {
         char buf[sizeof(T)];
-        SIZE_T read;
-        if (!ReadProcessMemory(pid, (LPCVOID)addr, (LPVOID)buf, sizeof(T), &read)) {
-            throw "ReadProcessMemory error";
+        if (memcpy_s((void*)buf, sizeof(T), (void*)addr, sizeof(T))) {
+            throw "memcpy_s error";
         }
         return *(T*)buf;
     };
@@ -205,10 +203,8 @@ void psolua_initialize_state(void) {
 static std::string psolualib_read_cstr(int memory_address, int len) {
     char buf[8192];
     memset(buf, 0, len);
-    SIZE_T read;
-    auto pid = GetCurrentProcess();
-    if (!ReadProcessMemory(pid, (LPCVOID)memory_address, buf, len, &read)) {
-        throw "ReadProcessMemory error";
+    if (memcpy_s((void*)buf, (len - 1), (void*)memory_address, (len - 1))) {
+        throw "memcpy_s error";
     }
     return buf;
 }
@@ -218,10 +214,8 @@ static std::string psolualib_read_wstr(int memory_address, int len) {
     char buf2[8192];
     memset(buf, 0, len * 2);
     memset(buf2, 0, len * 2);
-    SIZE_T read;
-    auto pid = GetCurrentProcess();
-    if (!ReadProcessMemory(pid, (LPCVOID)memory_address, buf, len * 2, &read)) {
-        throw "ReadProcessMemory error";
+    if (memcpy_s((void*)buf, (len - 2), (void*)memory_address, (len - 2))) {
+        throw "memcpy_s error";
     }
     if (!WideCharToMultiByte(CP_UTF8, 0, (LPCWCH)buf, len, buf2, 8192, nullptr, nullptr)) {
         throw "invalid utf-16 string";
@@ -233,13 +227,11 @@ static sol::table psolualib_read_mem(sol::table t, int memory_address, int len) 
     sol::state_view lua(g_LuaState);
     unsigned char buf[8192];
     memset(buf, 0, len);
-    SIZE_T read;
-    auto pid = GetCurrentProcess();
     if (len < 0) {
         throw "length must be greater than 0";
     }
-    if (!ReadProcessMemory(pid, (LPCVOID)memory_address, buf, len, &read)) {
-        throw "ReadProcessMemory error";
+    if (memcpy_s((void*)buf, len, (void*)memory_address, len)) {
+        throw "memcpy_s error";
     }
     for (int i = 0; i < len; i++) {
         t.add((int)buf[i]);
@@ -250,10 +242,8 @@ static sol::table psolualib_read_mem(sol::table t, int memory_address, int len) 
 static std::string psolualib_read_mem_str(int memory_address, int len) {
     char buf[8192];
     memset(buf, 0, len);
-    SIZE_T read;
-    auto pid = GetCurrentProcess();
-    if (!ReadProcessMemory(pid, (LPCVOID)memory_address, buf, len, &read)) {
-        throw "ReadProcessMemory error";
+    if (memcpy_s((void*)buf, len, (void*)memory_address, len)) {
+        throw "memcpy_s error";
     }
     return std::string(buf, len);
 }
